@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+
+# Xcode / Swift build artifacts
+build/
+DerivedData/
+*.xcuserstate
+*.xcscmblueprint
+xcuserdata/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.swiftpm/
+.build/
+Package.resolved
+
+# CocoaPods (not used, but just in case)
+Pods/
+
+# Local scratch / intermediate image-generation files
+tmp/
+
+# Generated Xcode project — this repo uses XcodeGen, so the .xcodeproj is
+# regenerated from project.yml with `xcodegen generate`.
+MacFocus.xcodeproj/
