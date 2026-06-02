@@ -23,6 +23,10 @@ Pods/
 
 # Local scratch / intermediate image-generation files
 tmp/
+.superpowers/
+
+# Local collaboration handoff; never publish.
+together.md
 
 # Generated Xcode project — this repo uses XcodeGen, so the .xcodeproj is
 # regenerated from project.yml with `xcodegen generate`.
