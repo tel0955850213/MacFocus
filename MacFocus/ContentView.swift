@@ -1,15 +1,18 @@
 import SwiftUI
 
 enum AppTab: String, CaseIterable, Identifiable {
-    case timer, collection, gacha, stats, profile
+    case timer, collection, gacha, stats, profile, settings
     var id: String { rawValue }
-    var label: String {
+
+    /// Localization key for the sidebar label.
+    var labelKey: String {
         switch self {
-        case .timer: return "專注"
-        case .collection: return "圖鑑"
-        case .gacha: return "抽卡"
-        case .stats: return "統計"
-        case .profile: return "我的"
+        case .timer: return "nav.timer"
+        case .collection: return "nav.collection"
+        case .gacha: return "nav.gacha"
+        case .stats: return "nav.stats"
+        case .profile: return "nav.profile"
+        case .settings: return "nav.settings"
         }
     }
     var icon: String {
@@ -19,6 +22,7 @@ enum AppTab: String, CaseIterable, Identifiable {
         case .gacha: return "sparkles"
         case .stats: return "chart.bar.fill"
         case .profile: return "person.crop.circle.fill"
+        case .settings: return "gearshape.fill"
         }
     }
 }
@@ -27,6 +31,7 @@ struct ContentView: View {
     @EnvironmentObject var progress: ProgressStore
     @EnvironmentObject var pet: PetController
     @EnvironmentObject var engine: TimerEngine
+    @EnvironmentObject var loc: LocalizationManager
     @State private var tab: AppTab = .timer
 
     var body: some View {
@@ -43,6 +48,7 @@ struct ContentView: View {
                     case .gacha: GachaScreen()
                     case .stats: StatsScreen()
                     case .profile: ProfileScreen()
+                    case .settings: SettingsScreen()
                     }
                 }
             }
@@ -67,7 +73,7 @@ struct ContentView: View {
                     .padding(.horizontal, 14).padding(.top, 18).padding(.bottom, 12)
 
                 ForEach(AppTab.allCases) { t in
-                    SidebarRow(tab: t, selected: tab == t) {
+                    SidebarRow(icon: t.icon, label: loc(t.labelKey), selected: tab == t) {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { tab = t }
                     }
                 }
@@ -81,12 +87,12 @@ struct ContentView: View {
 
     private var petToggle: some View {
         Button {
-            pet.toggle(progress: progress, engine: engine)
+            pet.toggle(progress: progress, engine: engine, loc: loc)
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: pet.isShowing ? "pawprint.fill" : "pawprint")
                     .foregroundStyle(pet.isShowing ? Theme.accent : Theme.textSecondary)
-                Text(pet.isShowing ? "收起桌面夥伴" : "召喚桌面夥伴")
+                Text(pet.isShowing ? loc("pet.dismiss") : loc("pet.summon"))
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(pet.isShowing ? .white : Theme.textSecondary)
                 Spacer()
@@ -116,17 +122,18 @@ struct ContentView: View {
 }
 
 private struct SidebarRow: View {
-    let tab: AppTab
+    let icon: String
+    let label: String
     let selected: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
-                Image(systemName: tab.icon)
+                Image(systemName: icon)
                     .font(.system(size: 16, weight: .semibold))
                     .frame(width: 22)
-                Text(tab.label)
+                Text(label)
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                 Spacer()
             }

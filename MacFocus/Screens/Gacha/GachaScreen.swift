@@ -2,6 +2,8 @@ import SwiftUI
 
 struct GachaScreen: View {
     @EnvironmentObject var progress: ProgressStore
+    @EnvironmentObject var settings: SettingsStore
+    @EnvironmentObject var loc: LocalizationManager
     @State private var shake = false
 
     var canDraw: Bool { progress.coins >= progress.drawCost }
@@ -9,14 +11,15 @@ struct GachaScreen: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                Text("召喚之門")
+                Text(loc("gacha.title"))
                     .font(.system(size: 28, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("用專注賺來的金幣召喚新英雄。越稀有越難遇見。")
+                Text(loc("gacha.subtitle"))
                     .font(.system(size: 14, design: .rounded))
                     .foregroundStyle(Theme.textSecondary)
+                    .multilineTextAlignment(.center)
 
-                // 召喚水晶
+                // Summoning crystal
                 ZStack {
                     Circle()
                         .fill(RadialGradient(colors: [Theme.primaryHi.opacity(0.7), Theme.primary.opacity(0.1)],
@@ -33,23 +36,24 @@ struct GachaScreen: View {
 
                 rarityOdds
 
-                PrimaryButton(title: canDraw ? "召喚(\(progress.drawCost) 金幣)" : "金幣不足",
+                PrimaryButton(title: canDraw ? String(format: loc("gacha.draw"), progress.drawCost) : loc("gacha.notEnough"),
                               systemImage: "wand.and.stars",
                               gradient: Theme.goldGradient,
                               enabled: canDraw) {
                     shake.toggle()
+                    Notifier.effect(settings: settings)
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         _ = progress.drawGacha()
                     }
                 }
                 .frame(maxWidth: 320)
 
-                Text("目前金幣:\(progress.coins)")
+                Text(String(format: loc("gacha.coins"), progress.coins))
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(Theme.gold)
 
 #if DEBUG
-                Button("（測試）+500 金幣") { progress._debugGrant(coins: 500) }
+                Button(loc("gacha.debugGrant")) { progress._debugGrant(coins: 500) }
                     .buttonStyle(.plain).foregroundStyle(Theme.textSecondary.opacity(0.5))
                     .font(.system(size: 11))
 #endif

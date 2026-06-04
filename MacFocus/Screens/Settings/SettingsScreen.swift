@@ -1,0 +1,163 @@
+import SwiftUI
+
+struct SettingsScreen: View {
+    @EnvironmentObject var settings: SettingsStore
+    @EnvironmentObject var progress: ProgressStore
+    @EnvironmentObject var loc: LocalizationManager
+    @State private var showResetConfirm = false
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 22) {
+                Text(loc("settings.title"))
+                    .font(.system(size: 26, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+
+                languageSection
+                timerSection
+                notifSection
+                dataSection
+            }
+            .padding(32)
+            .frame(maxWidth: 560)
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    // MARK: - Language
+
+    private var languageSection: some View {
+        SettingsCard(title: loc("settings.language")) {
+            Picker("", selection: $loc.language) {
+                ForEach(AppLanguage.allCases) { lang in
+                    Text(loc(lang.displayKey)).tag(lang)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+        }
+    }
+
+    // MARK: - Timer
+
+    private var timerSection: some View {
+        SettingsCard(title: loc("settings.timer")) {
+            stepperRow(loc("settings.focusLen"), value: $settings.focusMinutes,
+                       range: 5...90, step: 5, unit: loc("unit.min"))
+            Divider().overlay(Theme.surfaceHi)
+            stepperRow(loc("settings.shortBreak"), value: $settings.shortBreakMinutes,
+                       range: 1...30, step: 1, unit: loc("unit.min"))
+            Divider().overlay(Theme.surfaceHi)
+            stepperRow(loc("settings.longBreak"), value: $settings.longBreakMinutes,
+                       range: 5...45, step: 5, unit: loc("unit.min"))
+            Divider().overlay(Theme.surfaceHi)
+            stepperRow(loc("settings.rounds"), value: $settings.roundsBeforeLongBreak,
+                       range: 2...8, step: 1, unit: loc("unit.rounds"))
+            Divider().overlay(Theme.surfaceHi)
+            stepperRow(loc("settings.dailyGoal"), value: $settings.dailyGoalMinutes,
+                       range: 30...480, step: 30, unit: loc("unit.min"))
+        }
+    }
+
+    // MARK: - Notifications & sound
+
+    private var notifSection: some View {
+        SettingsCard(title: loc("settings.notifSound")) {
+            toggleRow(loc("settings.completeSound"), isOn: $settings.completionSound)
+            Divider().overlay(Theme.surfaceHi)
+            toggleRow(loc("settings.systemNotif"), isOn: $settings.systemNotifications)
+            Divider().overlay(Theme.surfaceHi)
+            toggleRow(loc("settings.sfx"), isOn: $settings.soundEffects)
+        }
+    }
+
+    // MARK: - Data & about
+
+    private var dataSection: some View {
+        SettingsCard(title: loc("settings.data")) {
+            HStack {
+                Text(loc("settings.resetProgress"))
+                    .font(.system(size: 14, design: .rounded)).foregroundStyle(.white)
+                Spacer()
+                Button(loc("settings.reset")) { showResetConfirm = true }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 14).padding(.vertical, 7)
+                    .background(Theme.accent, in: Capsule())
+            }
+            .confirmationDialog(loc("settings.resetConfirm"), isPresented: $showResetConfirm, titleVisibility: .visible) {
+                Button(loc("settings.reset"), role: .destructive) { progress.resetAll() }
+                Button(loc("common.cancel"), role: .cancel) {}
+            }
+            Divider().overlay(Theme.surfaceHi)
+            infoRow(loc("settings.version"), trailing: "1.0 (1)")
+            Divider().overlay(Theme.surfaceHi)
+            HStack {
+                Text(loc("settings.github")).font(.system(size: 14, design: .rounded)).foregroundStyle(.white)
+                Spacer()
+                Link("github.com/tel0955850213/MacFocus",
+                     destination: URL(string: "https://github.com/tel0955850213/MacFocus")!)
+                    .font(.system(size: 12, design: .rounded)).foregroundStyle(Theme.primaryHi)
+            }
+            Divider().overlay(Theme.surfaceHi)
+            HStack {
+                Text(loc("settings.feedback")).font(.system(size: 14, design: .rounded)).foregroundStyle(.white)
+                Spacer()
+                Link("880319dai@gmail.com",
+                     destination: URL(string: "mailto:880319dai@gmail.com?subject=MacFocus%20Feedback")!)
+                    .font(.system(size: 12, design: .rounded)).foregroundStyle(Theme.primaryHi)
+            }
+        }
+    }
+
+    // MARK: - Reusable rows
+
+    private func stepperRow(_ title: String, value: Binding<Int>, range: ClosedRange<Int>,
+                            step: Int, unit: String) -> some View {
+        HStack {
+            Text(title).font(.system(size: 14, design: .rounded)).foregroundStyle(.white)
+            Spacer()
+            Text("\(value.wrappedValue) \(unit)")
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .foregroundStyle(Theme.textSecondary)
+                .frame(minWidth: 64, alignment: .trailing)
+            Stepper("", value: value, in: range, step: step).labelsHidden()
+        }
+    }
+
+    private func toggleRow(_ title: String, isOn: Binding<Bool>) -> some View {
+        HStack {
+            Text(title).font(.system(size: 14, design: .rounded)).foregroundStyle(.white)
+            Spacer()
+            Toggle("", isOn: isOn).labelsHidden().tint(Theme.primaryHi)
+        }
+    }
+
+    private func infoRow(_ title: String, trailing: String) -> some View {
+        HStack {
+            Text(title).font(.system(size: 14, design: .rounded)).foregroundStyle(.white)
+            Spacer()
+            Text(trailing).font(.system(size: 13, design: .rounded)).foregroundStyle(Theme.textSecondary)
+        }
+    }
+}
+
+/// A titled rounded card that lays its rows out vertically.
+private struct SettingsCard<Content: View>: View {
+    let title: String
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .foregroundStyle(Theme.textSecondary)
+                .textCase(.uppercase)
+            VStack(spacing: 12) { content }
+                .padding(16)
+                .frame(maxWidth: .infinity)
+                .background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))
+        }
+    }
+}

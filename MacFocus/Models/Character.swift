@@ -31,39 +31,42 @@ enum Rarity: Int, Codable, CaseIterable, Comparable {
 struct GameCharacter: Identifiable, Codable, Hashable {
     let id: String
     let name: String
-    let title: String           // 稱號,例如 "烈焰法師"
+    /// Localization key for the character's title (e.g. "char.ember.title").
+    let title: String
     let rarity: Rarity
     /// Asset image name in Assets.xcassets/characters; nil ⇒ render placeholder.
     let assetName: String?
-    /// 額外解鎖條件:累積專注時數門檻(小時)。0 ⇒ 只能靠抽卡。
+    /// Extra unlock condition: cumulative focus-hours threshold. 0 ⇒ gacha-only.
     let unlockHours: Double
+    /// Localization key for the character's tagline.
     let tagline: String
 
-    /// 主題色(立繪缺席時的佔位漸層用)
+    /// Theme color (used for the placeholder gradient when art is missing).
     var swatch: Color { Color(hex: swatchHex) }
     let swatchHex: UInt
 
-    /// 桌面夥伴的待機動畫風格 — 每個角色都不一樣,呼應她的世界觀。
+    /// Idle animation style for the desktop companion — unique per character to
+    /// echo her theme.
     var petMotion: PetMotion {
         switch id {
-        case "char_aurora":    return .bobSway      // 破曉遊俠:輕快上下 + 左右搖
-        case "char_vela":      return .dart         // 暗夜刺客:快速閃動
-        case "char_lyra":      return .spinSway     // 星詩人:旋律般擺動旋轉
-        case "char_seraphine": return .float        // 潮汐術師:緩慢漂浮
-        case "char_ember":     return .flicker      // 烈焰法師:火焰跳動縮放
-        case "char_noctis":    return .breathe      // 暗影女王:沉穩呼吸 + 淡入淡出
-        case "char_celestia":  return .glowPulse    // 聖光劍姬:浮空 + 發光脈動
-        case "char_aphrodite": return .heartbeat    // 黎明女神:心跳般律動
+        case "char_aurora":    return .bobSway      // Dawn Ranger: light bob + sway
+        case "char_vela":      return .dart         // Night Assassin: quick darting
+        case "char_lyra":      return .spinSway     // Starsong Bard: melodic sway/spin
+        case "char_seraphine": return .float        // Tide Sorceress: slow floating
+        case "char_ember":     return .flicker      // Flame Mage: flame-like flicker/scale
+        case "char_noctis":    return .breathe      // Shadow Queen: calm breathing + fade
+        case "char_celestia":  return .glowPulse    // Celestial Swordmaiden: hover + glow pulse
+        case "char_aphrodite": return .heartbeat    // Dawn Goddess: heartbeat rhythm
         default:               return .bobSway
         }
     }
 }
 
-/// 不同角色的待機動畫:用連續的正弦波組合出各自獨特的律動。
+/// Per-character idle animation: combines sine waves into a distinct rhythm.
 enum PetMotion {
     case bobSway, dart, spinSway, float, flicker, breathe, glowPulse, heartbeat
 
-    /// 依經過秒數算出當下的位移/旋轉/縮放/透明度。
+    /// Compute the current offset/rotation/scale/opacity from elapsed seconds.
     func frame(at t: Double) -> (dx: Double, dy: Double, rot: Double, scale: Double, opacity: Double) {
         func s(_ period: Double, _ phase: Double = 0) -> Double { sin(t * 2 * .pi / period + phase) }
         switch self {
@@ -75,7 +78,7 @@ enum PetMotion {
         case .breathe:   return (0, s(3.4) * -4, s(5.0) * 2, 1 + s(3.4) * 0.04, 0.85 + (s(3.4) + 1) / 2 * 0.15)
         case .glowPulse: return (0, s(2.2) * -7, s(4.4) * 3, 1 + abs(s(2.2)) * 0.05, 1)
         case .heartbeat:
-            let beat = pow(max(0, s(1.1)), 6)   // 尖銳的心跳脈衝
+            let beat = pow(max(0, s(1.1)), 6)   // sharp heartbeat pulse
             return (0, s(2.2) * -4, 0, 1 + beat * 0.12, 1)
         }
     }

@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// 抽卡揭曉全螢幕動畫:光芒爆發 → 立繪登場 → 稀有度標籤。
+/// Full-screen gacha reveal: light burst → splash art enters → rarity badge.
 struct GachaRevealView: View {
+    @EnvironmentObject var loc: LocalizationManager
     let character: GameCharacter
     let onDismiss: () -> Void
 
@@ -40,10 +41,10 @@ struct GachaRevealView: View {
                         Text(character.name)
                             .font(.system(size: 30, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
-                        Text(character.title)
+                        Text(loc(character.title))
                             .font(.system(size: 15, design: .rounded))
                             .foregroundStyle(Theme.textSecondary)
-                        Text(character.tagline)
+                        Text(loc(character.tagline))
                             .font(.system(size: 13, design: .rounded))
                             .foregroundStyle(Theme.textSecondary.opacity(0.8))
                             .multilineTextAlignment(.center)
@@ -51,7 +52,7 @@ struct GachaRevealView: View {
                     }
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
 
-                    Button("收下", action: dismiss)
+                    Button(loc("gacha.collect"), action: dismiss)
                         .buttonStyle(.plain)
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)

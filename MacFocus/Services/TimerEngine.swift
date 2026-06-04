@@ -4,31 +4,32 @@ import SwiftUI
 enum TimerPhase: String {
     case focus, shortBreak, longBreak, idle
 
-    var title: String {
+    /// Localization key for the phase label (resolved by the view).
+    var titleKey: String {
         switch self {
-        case .focus: return "專注中"
-        case .shortBreak: return "短休息"
-        case .longBreak: return "長休息"
-        case .idle: return "準備開始"
+        case .focus: return "phase.focus"
+        case .shortBreak: return "phase.shortBreak"
+        case .longBreak: return "phase.longBreak"
+        case .idle: return "phase.idle"
         }
     }
 }
 
-/// 番茄鐘狀態機。完成一次 focus 會回呼 onFocusCompleted(minutes)。
+/// Pomodoro state machine. Completing a focus session calls onFocusCompleted(minutes).
 @MainActor
 final class TimerEngine: ObservableObject {
     @Published var phase: TimerPhase = .idle
-    @Published private(set) var remaining: Int = 25 * 60   // 秒
+    @Published private(set) var remaining: Int = 25 * 60   // seconds
     @Published private(set) var isRunning = false
     @Published private(set) var completedFocusCount = 0
 
-    // 可設定的時長(分鐘)
+    // Configurable durations (minutes)
     var focusMinutes = 25
     var shortBreakMinutes = 5
     var longBreakMinutes = 15
     var roundsBeforeLongBreak = 4
 
-    /// 完成一段專注時呼叫,傳入該段分鐘數。
+    /// Called when a focus segment completes, with that segment's minutes.
     var onFocusCompleted: ((Int) -> Void)?
 
     private var timer: Timer?
@@ -48,6 +49,15 @@ final class TimerEngine: ObservableObject {
 
     var timeString: String {
         String(format: "%02d:%02d", remaining / 60, remaining % 60)
+    }
+
+    /// Apply user settings. If idle, reflect the new focus length immediately.
+    func apply(focus: Int, short: Int, long: Int, rounds: Int) {
+        focusMinutes = focus
+        shortBreakMinutes = short
+        longBreakMinutes = long
+        roundsBeforeLongBreak = rounds
+        if phase == .idle && !isRunning { remaining = focusMinutes * 60 }
     }
 
     // MARK: - Controls
@@ -72,7 +82,7 @@ final class TimerEngine: ObservableObject {
         remaining = focusMinutes * 60
     }
 
-    /// 略過目前階段(直接結束)。
+    /// Skip the current phase (end it immediately).
     func skip() { advancePhase() }
 
     private func tick() {

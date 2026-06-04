@@ -1,22 +1,23 @@
 import SwiftUI
 
-/// 桌面夥伴:用「分開生成的動作幀」+「程式做的連續動作」混合而成。
-/// - idle/眨眼/走路:程式驅動(呼吸、晃動、步伐),完全不飄。
-/// - 揮劍/吃蘋果/切蘋果:播放生成好的動作幀(短 clip)。
-/// - 胸前晃動:Metal distortionEffect,走路與落地時觸發二次彈動。
+/// Desktop companion: a single nice sprite + gentle procedural idle motion.
+/// Tapping plays a short action clip (when those frames exist) and a speech line.
+/// Hosted in an NSPanel, so `engine` and `loc` are passed in explicitly rather
+/// than read from the SwiftUI environment.
 struct PetView: View {
     let character: GameCharacter
     @ObservedObject var engine: TimerEngine
+    @ObservedObject var loc: LocalizationManager
     var onClose: () -> Void = {}
 
     @State private var startDate = Date()
     @State private var clip: PetClip? = nil
     @State private var clipStart = Date()
-    @State private var jumpStart: Double? = nil   // 跳躍開始時間(相對 startDate 的秒數)
+    @State private var jumpStart: Double? = nil   // jump start time (seconds since startDate)
     @State private var pokeLine: String? = nil
     @State private var hovering = false
 
-    // MARK: - 動作 clip 定義(幀名後綴 + 停留秒數)
+    // MARK: - Action clip definitions (frame-name suffix + hold seconds)
 
     enum PetClip {
         case eatApple, sword, chop
@@ -30,15 +31,14 @@ struct PetView: View {
         var total: Double { frames.reduce(0) { $0 + $1.1 } }
     }
 
-    private static let lines = ["專注一下,我陪你!", "你今天很棒 ✨", "再撐一下 🍅",
-                                "我相信你做得到!", "一起加油 💪", "看我切蘋果!"]
+    private var lines: [String] { (1...6).map { loc("pet.line.\($0)") } }
 
     private var timerBubble: String? {
         guard engine.isRunning else { return nil }
         let mins = Int(ceil(Double(engine.remaining) / 60.0))
         switch engine.phase {
-        case .focus:                  return "專注中 · 還有 \(mins) 分"
-        case .shortBreak, .longBreak: return "休息中 · 還有 \(mins) 分"
+        case .focus:                  return String(format: loc("pet.focusRemain"), mins)
+        case .shortBreak, .longBreak: return String(format: loc("pet.breakRemain"), mins)
         case .idle:                   return nil
         }
     }
@@ -141,7 +141,7 @@ struct PetView: View {
             jumpStart = now.timeIntervalSince(startDate)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.95) { jumpStart = nil }
         }
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) { pokeLine = Self.lines.randomElement() }
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) { pokeLine = lines.randomElement() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.4) {
             withAnimation(.easeOut(duration: 0.3)) { pokeLine = nil }
         }

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct StreakFlame: View {
+    @EnvironmentObject var loc: LocalizationManager
     let days: Int
     @State private var flicker = false
 
@@ -17,7 +18,7 @@ struct StreakFlame: View {
                 Text("\(days)")
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .foregroundStyle(Theme.textPrimary)
-                Text("天連續")
+                Text(loc("streak.unit"))
                     .font(.system(size: 11, weight: .medium, design: .rounded))
                     .foregroundStyle(Theme.textSecondary)
             }

@@ -1,10 +1,11 @@
 import SwiftUI
 
-/// 立繪載入:有素材就顯示圖(裁切對齊頂部,確保露出頭/臉),否則畫佔位漸層。
+/// Splash-art loader: shows the asset (top-aligned crop so the head/face stays
+/// visible) when present, otherwise a placeholder gradient.
 struct CharacterPortrait: View {
     let character: GameCharacter
     var locked: Bool = false
-    /// 高立繪填滿時的對齊方向,預設頂部(露臉)。
+    /// Alignment used when a tall image fills the frame; defaults to top (show face).
     var fillAlignment: Alignment = .top
 
     var body: some View {
@@ -37,6 +38,7 @@ struct CharacterPortrait: View {
 }
 
 struct CharacterCard: View {
+    @EnvironmentObject var loc: LocalizationManager
     let character: GameCharacter
     var unlocked: Bool
     var isPartner: Bool = false
@@ -50,13 +52,13 @@ struct CharacterCard: View {
                     .clipped()
                 VStack(alignment: .leading, spacing: 2) {
                     HStack {
-                        Text(unlocked ? character.name : "？？？")
+                        Text(unlocked ? character.name : loc("card.unknown"))
                             .font(.system(size: 15, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
                         Spacer()
                         RarityBadge(rarity: character.rarity)
                     }
-                    Text(unlocked ? character.title : "尚未解鎖")
+                    Text(unlocked ? loc(character.title) : loc("card.locked"))
                         .font(.system(size: 11, design: .rounded))
                         .foregroundStyle(Theme.textSecondary)
                         .lineLimit(1)

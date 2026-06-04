@@ -1,8 +1,9 @@
 import SwiftUI
 import AppKit
 
-/// 管理桌面夥伴的浮動視窗(NSPanel)。無邊框、透明、永遠浮在最上層、
-/// 可在所有桌面空間顯示,並可用滑鼠拖曳。由 ProgressStore.partner 決定顯示哪隻。
+/// Manages the desktop companion's floating window (NSPanel): borderless,
+/// transparent, always on top, visible on every Space, and draggable by mouse.
+/// ProgressStore.partner decides which character is shown.
 @MainActor
 final class PetController: ObservableObject {
     @Published private(set) var isShowing = false
@@ -10,18 +11,20 @@ final class PetController: ObservableObject {
     private var panel: NSPanel?
     private weak var progress: ProgressStore?
     private weak var engine: TimerEngine?
+    private weak var loc: LocalizationManager?
 
-    func toggle(progress: ProgressStore, engine: TimerEngine) {
-        isShowing ? hide() : show(progress: progress, engine: engine)
+    func toggle(progress: ProgressStore, engine: TimerEngine, loc: LocalizationManager) {
+        isShowing ? hide() : show(progress: progress, engine: engine, loc: loc)
     }
 
-    func show(progress: ProgressStore, engine: TimerEngine) {
+    func show(progress: ProgressStore, engine: TimerEngine, loc: LocalizationManager) {
         self.progress = progress
         self.engine = engine
+        self.loc = loc
         guard panel == nil else { isShowing = true; return }
         guard let character = progress.partner else { return }
 
-        let view = PetView(character: character, engine: engine) { [weak self] in self?.hide() }
+        let view = PetView(character: character, engine: engine, loc: loc) { [weak self] in self?.hide() }
             .environmentObject(progress)
         let hosting = NSHostingView(rootView: view)
         hosting.frame = NSRect(x: 0, y: 0, width: 200, height: 220)
@@ -39,7 +42,7 @@ final class PetController: ObservableObject {
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
         panel.hidesOnDeactivate = false
 
-        // 放到主螢幕右下角(避開 Dock/選單列)。
+        // Bottom-right of the main screen (clear of the Dock/menu bar).
         if let screen = NSScreen.main {
             let vf = screen.visibleFrame
             let origin = NSPoint(x: vf.maxX - 220, y: vf.minY + 20)
@@ -57,10 +60,10 @@ final class PetController: ObservableObject {
         isShowing = false
     }
 
-    /// 夥伴角色變更時,重建內容讓 sprite 跟著換。
+    /// Rebuild the content when the companion character changes, so the sprite updates.
     func refreshIfShowing() {
-        guard isShowing, let progress, let engine else { return }
+        guard isShowing, let progress, let engine, let loc else { return }
         hide()
-        show(progress: progress, engine: engine)
+        show(progress: progress, engine: engine, loc: loc)
     }
 }

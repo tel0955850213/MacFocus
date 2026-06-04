@@ -2,21 +2,22 @@ import SwiftUI
 
 struct ProfileScreen: View {
     @EnvironmentObject var progress: ProgressStore
+    @EnvironmentObject var loc: LocalizationManager
 
     var body: some View {
         ScrollView {
             VStack(spacing: 22) {
-                // 頭像 = 目前夥伴
+                // Avatar = current companion
                 if let p = progress.partner {
                     CharacterPortrait(character: p)
                         .frame(width: 110, height: 110)
                         .clipShape(Circle())
                         .overlay(Circle().stroke(Theme.heroGradient, lineWidth: 3))
                 }
-                Text("專注旅人")
+                Text(loc("profile.name"))
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("Lv. \(progress.level) · 累積 \(String(format: "%.1f", progress.totalFocusHours)) 小時")
+                Text("Lv. \(progress.level) · \(String(format: "%.1f", progress.totalFocusHours)) \(loc("unit.hours"))")
                     .font(.system(size: 13, design: .rounded))
                     .foregroundStyle(Theme.textSecondary)
 
@@ -24,22 +25,22 @@ struct ProfileScreen: View {
                       xpInto: progress.xpIntoLevel, xpSpan: progress.xpForNextLevel)
                     .frame(maxWidth: 320)
 
-                // 會員登入(Firebase 之後接上)
+                // Member sign-in (Firebase wired up later)
                 VStack(spacing: 12) {
-                    Text("雲端同步")
+                    Text(loc("profile.cloudSync"))
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    Text("登入後進度會自動備份,換裝置也不遺失。")
+                    Text(loc("profile.cloudDesc"))
                         .font(.system(size: 12, design: .rounded))
                         .foregroundStyle(Theme.textSecondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    PrimaryButton(title: "使用 Apple 登入", systemImage: "apple.logo",
+                    PrimaryButton(title: loc("profile.signInApple"), systemImage: "apple.logo",
                                   gradient: LinearGradient(colors: [.white.opacity(0.9), .white.opacity(0.7)],
                                                            startPoint: .top, endPoint: .bottom)) {
                         // TODO: Firebase Auth + Sign in with Apple
                     }
-                    PrimaryButton(title: "使用 Email 登入", systemImage: "envelope.fill") {
+                    PrimaryButton(title: loc("profile.signInEmail"), systemImage: "envelope.fill") {
                         // TODO: Firebase Auth
                     }
                 }

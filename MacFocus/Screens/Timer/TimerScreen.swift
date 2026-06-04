@@ -3,6 +3,8 @@ import SwiftUI
 struct TimerScreen: View {
     @EnvironmentObject var progress: ProgressStore
     @EnvironmentObject var engine: TimerEngine
+    @EnvironmentObject var settings: SettingsStore
+    @EnvironmentObject var loc: LocalizationManager
 
     @State private var confetti = 0
     @State private var celebrate = false
@@ -15,7 +17,7 @@ struct TimerScreen: View {
 
                     CircularTimer(progress: engine.progress,
                                   timeString: engine.timeString,
-                                  phaseTitle: engine.phase.title,
+                                  phaseTitle: loc(engine.phase.titleKey),
                                   tint: engine.phase == .focus ? Theme.heroGradient
                                         : LinearGradient(colors: [Theme.mint, Theme.primaryHi], startPoint: .top, endPoint: .bottom),
                                   running: engine.isRunning)
@@ -33,12 +35,13 @@ struct TimerScreen: View {
         .onAppear {
             engine.onFocusCompleted = { minutes in
                 let unlocked = progress.recordCompletedFocus(minutes: minutes)
+                Notifier.focusFinished(settings: settings, minutes: minutes)
                 confetti += 1
                 withAnimation(.spring) { celebrate = true }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                     withAnimation { celebrate = false }
                 }
-                // 時數門檻解鎖的限定角色,排隊揭曉。
+                // Queue the reveal for any character unlocked by the focus-hours gate.
                 if let first = unlocked.first {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                         progress.pendingReveal = first
@@ -51,7 +54,7 @@ struct TimerScreen: View {
     private var header: some View {
         HStack {
             VStack(alignment: .leading, spacing: 10) {
-                Text("專注一下,解鎖你的英雄")
+                Text(loc("timer.subtitle"))
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                 XPBar(level: progress.level, progress: progress.levelProgress,
@@ -65,7 +68,7 @@ struct TimerScreen: View {
 
     private var controls: some View {
         HStack(spacing: 14) {
-            PrimaryButton(title: engine.isRunning ? "暫停" : "開始",
+            PrimaryButton(title: engine.isRunning ? loc("timer.pause") : loc("timer.start"),
                           systemImage: engine.isRunning ? "pause.fill" : "play.fill") {
                 engine.isRunning ? engine.pause() : engine.start()
             }
@@ -100,7 +103,7 @@ struct TimerScreen: View {
                     Text(partner.name)
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
-                    Text(celebrate ? "太棒了!我們又更強了!" : partner.tagline)
+                    Text(celebrate ? loc("timer.celebrate") : loc(partner.tagline))
                         .font(.system(size: 13, design: .rounded))
                         .foregroundStyle(Theme.textSecondary)
                 }

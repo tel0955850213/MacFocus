@@ -1,8 +1,9 @@
 import Foundation
 import SwiftUI
 
-/// 玩家持久狀態的單一真實來源。本地用 UserDefaults 持久化;
-/// 之後接 Firebase 時,只要在 load()/save() 加上雲端同步即可(local-first)。
+/// Single source of truth for the player's persistent state. Persisted locally via
+/// UserDefaults; to add Firebase later, just hook cloud sync into load()/save()
+/// (local-first).
 @MainActor
 final class ProgressStore: ObservableObject {
     @Published private(set) var xp: Int = 0
@@ -13,7 +14,7 @@ final class ProgressStore: ObservableObject {
     @Published private(set) var unlockedIds: Set<String> = []
     @Published var partnerId: String? = nil
 
-    /// 抽卡剛解鎖的新角色 — 由 UI 觀察以播放揭曉動畫。
+    /// A character just unlocked from a draw — observed by the UI to play the reveal.
     @Published var pendingReveal: GameCharacter? = nil
 
     private var lastFocusDay: Date? = nil
@@ -39,7 +40,8 @@ final class ProgressStore: ObservableObject {
 
     // MARK: - Mutations
 
-    /// 完成一段專注後呼叫。回傳本次新解鎖(因時數門檻)的角色,供慶祝畫面使用。
+    /// Call after a focus session ends. Returns characters newly unlocked by the
+    /// focus-hours threshold, for the celebration screen.
     @discardableResult
     func recordCompletedFocus(minutes: Int) -> [GameCharacter] {
         sessions.append(FocusSession(date: Date(), minutes: minutes))
@@ -52,7 +54,7 @@ final class ProgressStore: ObservableObject {
         return newlyUnlocked
     }
 
-    /// 花金幣抽一張卡。金幣不足回傳 nil。
+    /// Spend coins to draw one card. Returns nil when there aren't enough coins.
     func drawGacha() -> GameCharacter? {
         guard coins >= drawCost else { return nil }
         coins -= drawCost
@@ -64,7 +66,7 @@ final class ProgressStore: ObservableObject {
             roll -= c.rarity.drawWeight
             if roll < 0 { picked = c; break }
         }
-        // 已擁有則退還部分金幣(碎片轉換),仍展示該角色。
+        // Already owned: refund half the cost (shard conversion) but still show her.
         if unlockedIds.contains(picked.id) {
             coins += drawCost / 2
         } else {
@@ -87,7 +89,7 @@ final class ProgressStore: ObservableObject {
         defer { lastFocusDay = today }
         guard let last = lastFocusDay else { currentStreak = 1; bestStreak = max(bestStreak, 1); return }
         let lastDay = cal.startOfDay(for: last)
-        if cal.isDate(lastDay, inSameDayAs: today) { return } // 今天已記過
+        if cal.isDate(lastDay, inSameDayAs: today) { return } // already counted today
         let yesterday = cal.date(byAdding: .day, value: -1, to: today)!
         currentStreak = cal.isDate(lastDay, inSameDayAs: yesterday) ? currentStreak + 1 : 1
         bestStreak = max(bestStreak, currentStreak)
@@ -105,7 +107,7 @@ final class ProgressStore: ObservableObject {
 
     // MARK: - Level curve
 
-    /// 升下一級所需累積 XP:平滑遞增曲線。
+    /// Total XP required to reach a level — a smooth increasing curve.
     static func xpThreshold(forLevel level: Int) -> Int {
         guard level > 1 else { return 0 }
         return (level - 1) * (level - 1) * 100
@@ -138,7 +140,7 @@ final class ProgressStore: ObservableObject {
     private func load() {
         guard let data = UserDefaults.standard.data(forKey: defaultsKey),
               let snap = try? JSONDecoder().decode(Snapshot.self, from: data) else {
-            // 首次啟動:送兩張入門 N 卡。
+            // First launch: grant two starter N cards.
             unlockedIds = Set(CharacterCatalog.gachaPool.prefix(2).map { $0.id })
             partnerId = unlockedIds.first
             return
@@ -147,6 +149,16 @@ final class ProgressStore: ObservableObject {
         currentStreak = snap.currentStreak; bestStreak = snap.bestStreak
         sessions = snap.sessions; unlockedIds = Set(snap.unlockedIds)
         partnerId = snap.partnerId; lastFocusDay = snap.lastFocusDay
+    }
+
+    /// Erase all progress and re-seed the two starter characters.
+    func resetAll() {
+        xp = 0; coins = 0; currentStreak = 0; bestStreak = 0
+        sessions = []; lastFocusDay = nil
+        unlockedIds = Set(CharacterCatalog.gachaPool.prefix(2).map { $0.id })
+        partnerId = unlockedIds.first
+        pendingReveal = nil
+        save()
     }
 
 #if DEBUG
