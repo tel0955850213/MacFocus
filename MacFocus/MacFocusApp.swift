@@ -7,6 +7,7 @@ struct MacFocusApp: App {
     @StateObject private var engine = TimerEngine()
     @StateObject private var settings = SettingsStore()
     @StateObject private var loc = LocalizationManager()
+    @StateObject private var purchases = PurchaseStore.shared
 
     var body: some Scene {
         WindowGroup {
@@ -16,6 +17,7 @@ struct MacFocusApp: App {
                 .environmentObject(engine)
                 .environmentObject(settings)
                 .environmentObject(loc)
+                .environmentObject(purchases)
                 .frame(minWidth: 920, minHeight: 640)
                 .preferredColorScheme(.dark)
                 .onAppear { applyTimerSettings() }

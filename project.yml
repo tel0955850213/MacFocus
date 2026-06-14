@@ -42,3 +42,20 @@ targets:
         NSHumanReadableCopyright: ""
         NSMainStoryboardFile: ""
         LSApplicationCategoryType: public.app-category.productivity
+
+schemes:
+  MacFocus:
+    build:
+      targets:
+        MacFocus: all
+    run:
+      config: Debug
+      storeKitConfiguration: Products.storekit
+    test:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

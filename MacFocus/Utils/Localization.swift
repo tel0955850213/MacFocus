@@ -170,6 +170,20 @@ enum L10n {
         "onboarding.3.title": "桌面夥伴陪你專注",
         "onboarding.3.body": "把喜歡的角色召喚到桌面,專注時一直陪著你。",
 
+        // Pro / paywall
+        "pro.title": "Focus Quest Pro",
+        "pro.tagline": "解鎖全部,專注更帶勁",
+        "pro.benefit.1": "立即解鎖所有傳說角色",
+        "pro.benefit.2": "專注金幣 2 倍",
+        "pro.benefit.3": "支持獨立開發 + 專屬徽章",
+        "pro.subscribe": "訂閱",
+        "pro.restore": "還原購買",
+        "pro.current": "你已是 Pro 會員 ✨",
+        "pro.upgrade": "升級 Pro",
+        "pro.member": "Pro 會員",
+        "pro.noProducts": "目前無法載入方案,請稍後再試。",
+        "pro.maybeLater": "以後再說",
+
         // Character titles
         "char.aurora.title": "晨曦遊俠",
         "char.vela.title": "夜風刺客",
@@ -301,6 +315,20 @@ enum L10n {
         "onboarding.2.body": "Spend coins on draws to unlock rare characters and limited looks.",
         "onboarding.3.title": "A companion on your desktop",
         "onboarding.3.body": "Summon a favorite to your desktop to keep you company while you focus.",
+
+        // Pro / paywall
+        "pro.title": "Focus Quest Pro",
+        "pro.tagline": "Unlock everything, focus harder",
+        "pro.benefit.1": "Instantly unlock all legendary characters",
+        "pro.benefit.2": "Earn 2× focus coins",
+        "pro.benefit.3": "Support indie development + a supporter badge",
+        "pro.subscribe": "Subscribe",
+        "pro.restore": "Restore purchases",
+        "pro.current": "You're a Pro member ✨",
+        "pro.upgrade": "Upgrade to Pro",
+        "pro.member": "Pro member",
+        "pro.noProducts": "Plans can't be loaded right now. Please try again later.",
+        "pro.maybeLater": "Maybe later",
 
         // Character titles
         "char.aurora.title": "Dawn Ranger",

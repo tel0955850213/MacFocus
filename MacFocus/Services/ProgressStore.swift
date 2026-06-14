@@ -37,7 +37,10 @@ final class ProgressStore: ObservableObject {
     /// Minutes focused today — used for the daily-goal ring.
     var todayFocusMinutes: Int { sessions.minutes(on: Date()) }
 
-    func isUnlocked(_ c: GameCharacter) -> Bool { unlockedIds.contains(c.id) }
+    func isUnlocked(_ c: GameCharacter) -> Bool {
+        // Pro members get the time-gated legendary characters instantly.
+        unlockedIds.contains(c.id) || (PurchaseStore.shared.isPro && c.unlockHours > 0)
+    }
     var partner: GameCharacter? { partnerId.flatMap { CharacterCatalog.character(id: $0) } }
 
     // MARK: - Mutations
@@ -48,7 +51,7 @@ final class ProgressStore: ObservableObject {
     func recordCompletedFocus(minutes: Int) -> [GameCharacter] {
         sessions.append(FocusSession(date: Date(), minutes: minutes))
         xp += minutes * 2
-        coins += minutes
+        coins += minutes * (PurchaseStore.shared.isPro ? 2 : 1)   // Pro: 2× coins
         updateStreak()
         let newlyUnlocked = checkTimeGatedUnlocks()
         if partnerId == nil { partnerId = CharacterCatalog.gachaPool.first?.id }
