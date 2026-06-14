@@ -39,9 +39,13 @@ struct OnboardingView: View {
                 let p = pages[page]
                 ZStack {
                     Circle().fill(p.tint.opacity(0.18)).frame(width: 150, height: 150)
-                    Image(systemName: p.icon)
-                        .font(.system(size: 64, weight: .bold))
-                        .foregroundStyle(p.tint)
+                    if page == 0 {
+                        MascotView(state: .wave, size: 140)
+                    } else {
+                        Image(systemName: p.icon)
+                            .font(.system(size: 64, weight: .bold))
+                            .foregroundStyle(p.tint)
+                    }
                 }
                 .id(page)
                 .transition(.scale.combined(with: .opacity))
