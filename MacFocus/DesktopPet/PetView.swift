@@ -13,7 +13,6 @@ struct PetView: View {
     @State private var startDate = Date()
     @State private var clip: PetClip? = nil
     @State private var clipStart = Date()
-    @State private var jumpStart: Double? = nil   // jump start time (seconds since startDate)
     @State private var pokeLine: String? = nil
     @State private var hovering = false
 
@@ -129,18 +128,10 @@ struct PetView: View {
             .id(text)
     }
 
-    // MARK: - 互動:點擊隨機觸發(吃蘋果 / 揮劍 / 切蘋果 / 跳)
+    // MARK: - Interaction: tapping plays a random action clip + a speech line.
 
     private func poke() {
-        let now = Date()
-        switch Int.random(in: 0..<4) {
-        case 0: play(.eatApple)
-        case 1: play(.sword)
-        case 2: play(.chop)
-        default:
-            jumpStart = now.timeIntervalSince(startDate)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.95) { jumpStart = nil }
-        }
+        play([.eatApple, .sword, .chop].randomElement()!)
         withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) { pokeLine = lines.randomElement() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.4) {
             withAnimation(.easeOut(duration: 0.3)) { pokeLine = nil }

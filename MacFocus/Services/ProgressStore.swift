@@ -34,6 +34,8 @@ final class ProgressStore: ObservableObject {
     }
     var totalFocusMinutes: Int { sessions.reduce(0) { $0 + $1.minutes } }
     var totalFocusHours: Double { Double(totalFocusMinutes) / 60.0 }
+    /// Minutes focused today — used for the daily-goal ring.
+    var todayFocusMinutes: Int { sessions.minutes(on: Date()) }
 
     func isUnlocked(_ c: GameCharacter) -> Bool { unlockedIds.contains(c.id) }
     var partner: GameCharacter? { partnerId.flatMap { CharacterCatalog.character(id: $0) } }

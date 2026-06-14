@@ -60,6 +60,8 @@ struct TimerScreen: View {
                 XPBar(level: progress.level, progress: progress.levelProgress,
                       xpInto: progress.xpIntoLevel, xpSpan: progress.xpForNextLevel)
                     .frame(maxWidth: 320)
+                DailyGoalRing(todayMinutes: progress.todayFocusMinutes,
+                              goalMinutes: settings.dailyGoalMinutes)
             }
             Spacer()
             StreakFlame(days: progress.currentStreak)

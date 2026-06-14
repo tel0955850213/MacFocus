@@ -154,6 +154,22 @@ enum L10n {
         "unit.rounds": "輪",
         "common.cancel": "取消",
 
+        // Daily goal
+        "daily.goal": "今日目標",
+        "daily.progress": "%d / %d 分",
+        "daily.done": "今日目標達成 🎉",
+
+        // Onboarding
+        "onboarding.skip": "略過",
+        "onboarding.next": "下一步",
+        "onboarding.start": "開始專注",
+        "onboarding.1.title": "專注賺取獎勵",
+        "onboarding.1.body": "完成番茄鐘專注,累積 XP、金幣與連續天數。",
+        "onboarding.2.title": "收集你的英雄",
+        "onboarding.2.body": "用金幣抽卡,解鎖稀有角色與限定造型。",
+        "onboarding.3.title": "桌面夥伴陪你專注",
+        "onboarding.3.body": "把喜歡的角色召喚到桌面,專注時一直陪著你。",
+
         // Character titles
         "char.aurora.title": "晨曦遊俠",
         "char.vela.title": "夜風刺客",
@@ -269,6 +285,22 @@ enum L10n {
         "unit.min": "min",
         "unit.rounds": "rounds",
         "common.cancel": "Cancel",
+
+        // Daily goal
+        "daily.goal": "Today's goal",
+        "daily.progress": "%d / %d min",
+        "daily.done": "Daily goal reached 🎉",
+
+        // Onboarding
+        "onboarding.skip": "Skip",
+        "onboarding.next": "Next",
+        "onboarding.start": "Start focusing",
+        "onboarding.1.title": "Focus to earn rewards",
+        "onboarding.1.body": "Complete Pomodoro sessions to earn XP, coins, and daily streaks.",
+        "onboarding.2.title": "Collect your heroes",
+        "onboarding.2.body": "Spend coins on draws to unlock rare characters and limited looks.",
+        "onboarding.3.title": "A companion on your desktop",
+        "onboarding.3.body": "Summon a favorite to your desktop to keep you company while you focus.",
 
         // Character titles
         "char.aurora.title": "Dawn Ranger",

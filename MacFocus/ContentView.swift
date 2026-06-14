@@ -32,6 +32,7 @@ struct ContentView: View {
     @EnvironmentObject var pet: PetController
     @EnvironmentObject var engine: TimerEngine
     @EnvironmentObject var loc: LocalizationManager
+    @AppStorage("macfocus.onboarded") private var onboarded = false
     @State private var tab: AppTab = .timer
 
     var body: some View {
@@ -59,6 +60,12 @@ struct ContentView: View {
                     withAnimation { progress.pendingReveal = nil }
                 }
                 .transition(.opacity)
+            }
+        }
+        .overlay {
+            if !onboarded {
+                OnboardingView { onboarded = true }
+                    .transition(.opacity)
             }
         }
     }
