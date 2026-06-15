@@ -66,6 +66,9 @@ struct SettingsScreen: View {
             toggleRow(loc("settings.completeSound"), isOn: $settings.completionSound)
             Divider().overlay(Theme.surfaceHi)
             toggleRow(loc("settings.systemNotif"), isOn: $settings.systemNotifications)
+                .onChange(of: settings.systemNotifications) { _, enabled in
+                    if enabled { Notifier.requestNotificationPermission() }
+                }
             Divider().overlay(Theme.surfaceHi)
             toggleRow(loc("settings.sfx"), isOn: $settings.soundEffects)
         }

@@ -35,7 +35,7 @@ struct TimerScreen: View {
         .onAppear {
             engine.onFocusCompleted = { minutes in
                 let unlocked = progress.recordCompletedFocus(minutes: minutes)
-                Notifier.focusFinished(settings: settings, minutes: minutes)
+                Notifier.focusFinished(settings: settings, loc: loc, minutes: minutes)
                 confetti += 1
                 withAnimation(.spring) { celebrate = true }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {

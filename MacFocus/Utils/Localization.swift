@@ -113,6 +113,8 @@ enum L10n {
         "profile.cloudDesc": "登入後進度會自動備份,換裝置也不遺失。",
         "profile.signInApple": "使用 Apple 登入",
         "profile.signInEmail": "使用 Email 登入",
+        "profile.cloudComingSoon": "雲端同步即將推出",
+        "profile.cloudSoonDesc": "目前所有進度會安全保存在這台 Mac。Firebase 登入與跨裝置同步會在後續版本加入。",
 
         // Stats
         "stats.title": "專注統計",
@@ -158,6 +160,8 @@ enum L10n {
         "daily.goal": "今日目標",
         "daily.progress": "%d / %d 分",
         "daily.done": "今日目標達成 🎉",
+        "notify.focusComplete": "專注完成",
+        "notify.focusBody": "你已專注 %d 分鐘。休息一下吧!",
 
         // Onboarding
         "onboarding.skip": "略過",
@@ -259,6 +263,8 @@ enum L10n {
         "profile.cloudDesc": "Sign in to back up your progress and keep it across devices.",
         "profile.signInApple": "Sign in with Apple",
         "profile.signInEmail": "Sign in with Email",
+        "profile.cloudComingSoon": "Cloud sync is coming soon",
+        "profile.cloudSoonDesc": "Your progress is safely stored on this Mac for now. Firebase sign-in and cross-device sync will arrive in a later release.",
 
         // Stats
         "stats.title": "Focus Stats",
@@ -304,6 +310,8 @@ enum L10n {
         "daily.goal": "Today's goal",
         "daily.progress": "%d / %d min",
         "daily.done": "Daily goal reached 🎉",
+        "notify.focusComplete": "Focus complete",
+        "notify.focusBody": "You focused for %d minutes. Time for a break!",
 
         // Onboarding
         "onboarding.skip": "Skip",

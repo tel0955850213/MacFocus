@@ -30,24 +30,22 @@ struct ProfileScreen: View {
                 proCard
                     .frame(maxWidth: 360)
 
-                // Member sign-in (Firebase wired up later)
                 VStack(spacing: 12) {
                     Text(loc("profile.cloudSync"))
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    Text(loc("profile.cloudDesc"))
+                    Text(loc("profile.cloudSoonDesc"))
                         .font(.system(size: 12, design: .rounded))
                         .foregroundStyle(Theme.textSecondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    PrimaryButton(title: loc("profile.signInApple"), systemImage: "apple.logo",
-                                  gradient: LinearGradient(colors: [.white.opacity(0.9), .white.opacity(0.7)],
-                                                           startPoint: .top, endPoint: .bottom)) {
-                        // TODO: Firebase Auth + Sign in with Apple
-                    }
-                    PrimaryButton(title: loc("profile.signInEmail"), systemImage: "envelope.fill") {
-                        // TODO: Firebase Auth
-                    }
+                    Label(loc("profile.cloudComingSoon"), systemImage: "icloud.fill")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundStyle(Theme.textSecondary)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 9)
+                        .frame(maxWidth: .infinity)
+                        .background(Theme.surfaceHi.opacity(0.65), in: Capsule())
                 }
                 .padding(18)
                 .background(Theme.surface, in: RoundedRectangle(cornerRadius: 18))

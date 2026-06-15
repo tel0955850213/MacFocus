@@ -7,13 +7,20 @@ import UserNotifications
 enum Notifier {
     /// Call when a focus session finishes.
     @MainActor
-    static func focusFinished(settings: SettingsStore, minutes: Int) {
+    static func focusFinished(settings: SettingsStore, loc: LocalizationManager, minutes: Int) {
         if settings.completionSound || settings.soundEffects {
             NSSound(named: "Glass")?.play()
         }
         if settings.systemNotifications {
-            postBanner(title: "Focus complete", body: "You focused for \(minutes) minutes. Time for a break!")
+            postBanner(title: loc("notify.focusComplete"),
+                       body: String(format: loc("notify.focusBody"), minutes))
         }
+    }
+
+    /// Ask for notification permission when the user enables the setting, not at
+    /// the end of a focus session. This keeps the reward moment interruption-free.
+    static func requestNotificationPermission() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
     }
 
     /// A short tap/feedback sound for UI actions (e.g. a gacha draw).
@@ -25,8 +32,8 @@ enum Notifier {
 
     private static func postBanner(title: String, body: String) {
         let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
-            guard granted else { return }
+        center.getNotificationSettings { settings in
+            guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional else { return }
             let content = UNMutableNotificationContent()
             content.title = title
             content.body = body
