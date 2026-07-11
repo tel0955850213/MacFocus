@@ -5,13 +5,15 @@ import SwiftUI
 struct CharacterPortrait: View {
     let character: GameCharacter
     var locked: Bool = false
+    /// Uses an unlocked alternate pose when supplied; defaults to the base art.
+    var assetNameOverride: String? = nil
     /// Alignment used when a tall image fills the frame; defaults to top (show face).
     var fillAlignment: Alignment = .top
 
     var body: some View {
         Color.clear
             .overlay(alignment: fillAlignment) {
-                if let name = character.assetName, NSImage(named: name) != nil {
+                if let name = assetNameOverride ?? character.assetName, NSImage(named: name) != nil {
                     Image(name)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
@@ -39,6 +41,7 @@ struct CharacterPortrait: View {
 
 struct CharacterCard: View {
     @EnvironmentObject var loc: LocalizationManager
+    @EnvironmentObject var progress: ProgressStore
     let character: GameCharacter
     var unlocked: Bool
     var isPartner: Bool = false
@@ -62,6 +65,23 @@ struct CharacterCard: View {
                         .font(.system(size: 11, design: .rounded))
                         .foregroundStyle(Theme.textSecondary)
                         .lineLimit(1)
+                    if unlocked {
+                        HStack(spacing: 4) {
+                            Text(loc(character.realm.nameKey))
+                            Text("·")
+                            Text(loc(character.kind.labelKey))
+                        }
+                        .font(.system(size: 9, weight: .medium, design: .rounded))
+                        .foregroundStyle(Color(hex: character.realm.accentHex))
+
+                        HStack(spacing: 4) {
+                            Image(systemName: "heart.fill")
+                                .font(.system(size: 9))
+                            Text(String(format: loc("bond.level"), progress.bondLevel(for: character)))
+                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                        }
+                        .foregroundStyle(Theme.accent)
+                    }
                 }
                 .padding(10)
                 .frame(maxWidth: .infinity, alignment: .leading)

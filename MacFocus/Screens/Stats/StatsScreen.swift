@@ -3,10 +3,17 @@ import Charts
 
 struct StatsScreen: View {
     @EnvironmentObject var progress: ProgressStore
+    @EnvironmentObject var settings: SettingsStore
     @EnvironmentObject var loc: LocalizationManager
 
     private var daily: [(day: Date, minutes: Int)] {
         progress.sessions.dailyMinutes(lastDays: 7)
+    }
+
+    private var tagTotals: [(tag: String, minutes: Int)] {
+        progress.sessions.minutesByTag(lastDays: 84)
+            .map { (tag: $0.key, minutes: $0.value) }
+            .sorted { $0.minutes > $1.minutes }
     }
 
     var body: some View {
@@ -50,9 +57,62 @@ struct StatsScreen: View {
                 .frame(height: 240)
                 .padding(16)
                 .background(Theme.surface, in: RoundedRectangle(cornerRadius: 18))
+
+                HeatmapView(sessions: progress.sessions,
+                            dailyGoalMinutes: settings.dailyGoalMinutes)
+
+                if !tagTotals.isEmpty {
+                    TagBreakdownView(totals: tagTotals)
+                }
             }
             .padding(32)
         }
+    }
+}
+
+private struct TagBreakdownView: View {
+    let totals: [(tag: String, minutes: Int)]
+    @EnvironmentObject var loc: LocalizationManager
+
+    private var maxMinutes: Int { max(1, totals.map(\.minutes).max() ?? 1) }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(loc("stats.byTag"))
+                .font(.system(size: 16, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+
+            ForEach(totals, id: \.tag) { item in
+                VStack(spacing: 5) {
+                    HStack {
+                        Text(displayName(for: item.tag))
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white)
+                        Spacer()
+                        Text("\(item.minutes) \(loc("unit.min"))")
+                            .font(.system(size: 12, design: .rounded))
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                    GeometryReader { proxy in
+                        Capsule()
+                            .fill(Theme.surfaceHi)
+                            .overlay(alignment: .leading) {
+                                Capsule()
+                                    .fill(Theme.heroGradient)
+                                    .frame(width: proxy.size.width * CGFloat(item.minutes) / CGFloat(maxMinutes))
+                            }
+                    }
+                    .frame(height: 8)
+                }
+            }
+        }
+        .padding(16)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 18))
+    }
+
+    private func displayName(for tag: String) -> String {
+        FocusTag(rawValue: tag).map { loc($0.labelKey) }
+            ?? (tag == "untagged" ? loc("tag.untagged") : tag)
     }
 }
 

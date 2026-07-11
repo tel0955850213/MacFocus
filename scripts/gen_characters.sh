@@ -21,18 +21,18 @@ GEN_DIR="$HOME/.codex/generated_images"
 if command -v timeout >/dev/null; then TIMEOUT=(timeout 300)
 elif command -v gtimeout >/dev/null; then TIMEOUT=(gtimeout 300)
 else TIMEOUT=(); fi
-STYLE="anime / League-of-Legends splash-art style, glamorous confident adult woman, fully clothed in elegant fantasy outfit, dramatic lighting, vertical portrait, clean background, high detail, SFW"
+STYLE="original mythic fantasy game character splash art, fully clothed adult character, dramatic lighting, vertical portrait, clean readable silhouette, high detail, SFW, distinct facial identity, no generic repeated anime face, do not resemble any other roster character"
 
 # assetName|英文立繪描述(≤350 字,結尾自動加風格)
 CHARACTERS=(
-  "char_aurora|A dawn-ranger heroine with golden hair, light leather armor and a glowing bow, warm sunrise tones"
-  "char_vela|A night-wind assassin with short silver hair, sleek dark hooded outfit, cool blue moonlight tones"
-  "char_lyra|A starlit bard with flowing teal hair, ornate blue gown and a luminous harp, cosmic sparkles"
-  "char_seraphine|A tide sorceress with long aqua hair, flowing ocean-blue robes, water swirling around her"
-  "char_ember|A flame mage with fiery red hair, ornate purple-and-gold battle dress, embers and sparks around her"
-  "char_noctis|A shadow queen with long black hair, elegant dark violet royal gown, swirling shadow magic"
-  "char_celestia|A celestial swordmaiden in radiant white-and-orange armor, golden halo, holy sword, heavenly glow"
-  "char_aphrodite|A dawn goddess with rose-gold hair, flowing pink-and-gold divine dress, soft luminous aura"
+  "char_aurora|Aurora, an adult dawn ranger with sun-kissed warm brown skin, bright green almond eyes, a rounder friendly face with visible freckles, braided golden-brown hair, practical light leather armor, a glowing bow, and a small hawk-shaped dawn spirit"
+  "char_vela|Vela, an adult night assassin with deep umber skin, sharp hooded eyes, a narrow angular face, short silver hair with one long braid, a sleek fully covered dark outfit, twin crescent blades, and a silent blue moth spirit"
+  "char_lyra|Lyra, an adult starlit bard with deep brown skin, wide luminous violet eyes, a soft square face, flowing teal curls, an ornate blue gown, a luminous harp, and a constellation whale spirit made of stars"
+  "char_seraphine|Seraphine, an adult tide sorceress with cool olive skin, turquoise eyes, a long elegant face, waist-length aqua hair swept to one side, flowing ocean-blue robes, water ribbons, and a translucent koi spirit"
+  "char_ember|Ember, an adult flame mage with copper skin, golden-brown eyes, a strong high-cheekboned face, short fiery red curls, a fully covered purple-and-gold battle dress, ember sigils, and a tiny phoenix spirit"
+  "char_noctis|Noctis, an adult shadow queen with blue-black skin, pale silver eyes, a severe diamond-shaped face, long straight black hair, an elegant dark violet royal gown, shadow veils, and a quiet raven spirit"
+  "char_celestia|Celestia, an adult celestial swordmaiden with porcelain skin, deep sapphire eyes, a solemn angular heart-shaped face, long rich golden hair, radiant white-and-orange full armor, geometric star halo, holy sword, and a small orbiting sun spirit"
+  "char_aphrodite|Aphrodite, an adult dawn goddess with warm olive skin, luminous violet eyes, broad cheekbones, a confident full-lipped smile, rose-pink hair with loose waves, a fully clothed pink-and-gold divine outfit, rose constellations, and a floating heart-flame spirit"
 )
 
 gen_one() {

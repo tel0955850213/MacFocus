@@ -8,6 +8,7 @@ struct PetView: View {
     let character: GameCharacter
     @ObservedObject var engine: TimerEngine
     @ObservedObject var loc: LocalizationManager
+    @EnvironmentObject var progress: ProgressStore
     var onClose: () -> Void = {}
 
     @State private var startDate = Date()
@@ -15,6 +16,7 @@ struct PetView: View {
     @State private var clipStart = Date()
     @State private var pokeLine: String? = nil
     @State private var hovering = false
+    @State private var showingBondHearts = false
 
     // MARK: - Action clip definitions (frame-name suffix + hold seconds)
 
@@ -30,14 +32,19 @@ struct PetView: View {
         var total: Double { frames.reduce(0) { $0 + $1.1 } }
     }
 
-    private var lines: [String] { (1...6).map { loc("pet.line.\($0)") } }
+    private var lines: [String] {
+        let base = (1...6).map { loc("pet.line.\($0)") }
+        let levels = [2, 4, 6, 8, 10].filter { progress.bondLevel(for: character) >= $0 }
+        return base + levels.map { loc("bond.line.\($0)") }
+    }
 
     private var timerBubble: String? {
-        guard engine.isRunning else { return nil }
+        guard engine.phase != .idle else { return nil }
         let mins = Int(ceil(Double(engine.remaining) / 60.0))
+        let paused = engine.isRunning ? "" : " ⏸"
         switch engine.phase {
-        case .focus:                  return String(format: loc("pet.focusRemain"), mins)
-        case .shortBreak, .longBreak: return String(format: loc("pet.breakRemain"), mins)
+        case .focus:                  return String(format: loc("pet.focusRemain"), mins) + paused
+        case .shortBreak, .longBreak: return String(format: loc("pet.breakRemain"), mins) + paused
         case .idle:                   return nil
         }
     }
@@ -54,16 +61,34 @@ struct PetView: View {
                 }
                 VStack(spacing: 0) {
                     Spacer(minLength: bubbleText == nil ? 0 : 52)
-                    spriteImage(named: s.frame)
-                        .frame(width: 160, height: 160)
-                        .scaleEffect(x: s.scaleX, y: s.scaleY, anchor: .bottom)
-                        .offset(x: s.dx, y: s.dy)
-                        .shadow(color: .black.opacity(0.35), radius: 8, y: 6)
-                        .contentShape(Rectangle())
-                        .onTapGesture { poke() }
+                    ZStack(alignment: .bottomTrailing) {
+                        spriteImage(named: s.frame)
+                            .frame(width: 160, height: 160)
+                            .scaleEffect(x: s.scaleX, y: s.scaleY, anchor: .bottom)
+                            .offset(x: s.dx, y: s.dy)
+                            .shadow(color: .black.opacity(0.35), radius: 8, y: 6)
+                            .contentShape(Rectangle())
+                            .onTapGesture { tapped() }
+
+                        // Always-visible state badge so it reads as a timer control, not just a toy.
+                        Image(systemName: engine.isRunning ? "pause.fill" : "play.fill")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(.white)
+                            .frame(width: 24, height: 24)
+                            .background(Theme.accent, in: Circle())
+                            .overlay(Circle().stroke(.white.opacity(0.3), lineWidth: 1.5))
+                            .shadow(color: .black.opacity(0.3), radius: 3)
+                            .offset(x: -12, y: -4)
+                    }
                 }
             }
             .frame(width: 200, height: 230)
+        }
+        .overlay {
+            if showingBondHearts {
+                HeartBurstView()
+                    .allowsHitTesting(false)
+            }
         }
         .overlay(alignment: .topTrailing) {
             if hovering {
@@ -73,7 +98,25 @@ struct PetView: View {
                 }.buttonStyle(.plain).padding(6).transition(.opacity)
             }
         }
+        .overlay(alignment: .topLeading) {
+            if hovering && engine.phase != .idle {
+                Button(action: { engine.reset() }) {
+                    Image(systemName: "stop.circle.fill")
+                        .font(.system(size: 16)).foregroundStyle(.white.opacity(0.85)).shadow(radius: 2)
+                }.buttonStyle(.plain).padding(6).transition(.opacity)
+                    .help(loc("timer.cancelHint"))
+            }
+        }
         .onHover { h in withAnimation(.easeOut(duration: 0.15)) { hovering = h } }
+        .onChange(of: progress.lastBondLevelUp) { _, event in
+            guard event?.characterID == character.id else { return }
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
+                showingBondHearts = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
+                withAnimation(.easeOut(duration: 0.25)) { showingBondHearts = false }
+            }
+        }
     }
 
     // MARK: - 每幀計算(frame 名 + 變形 + 胸前晃動振幅)
@@ -107,7 +150,7 @@ struct PetView: View {
                 Image(name).resizable().interpolation(.high).aspectRatio(contentMode: .fit)
             } else {
                 Circle().fill(character.swatch.gradient)
-                    .overlay(Image(systemName: "sparkles").font(.system(size: 40)).foregroundStyle(.white.opacity(0.8)))
+                    .overlay(Image(systemName: "leaf.fill").font(.system(size: 40)).foregroundStyle(.white.opacity(0.8)))
                     .frame(width: 120, height: 120)
             }
         }
@@ -128,9 +171,10 @@ struct PetView: View {
             .id(text)
     }
 
-    // MARK: - Interaction: tapping plays a random action clip + a speech line.
+    // MARK: - Interaction: tapping starts/pauses the timer and plays a reaction.
 
-    private func poke() {
+    private func tapped() {
+        engine.isRunning ? engine.pause() : engine.start()
         play([.eatApple, .sword, .chop].randomElement()!)
         withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) { pokeLine = lines.randomElement() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.4) {
@@ -141,5 +185,26 @@ struct PetView: View {
     private func play(_ c: PetClip) {
         clip = c; clipStart = Date()
         DispatchQueue.main.asyncAfter(deadline: .now() + c.total) { if clip == c { clip = nil } }
+    }
+}
+
+private struct HeartBurstView: View {
+    @State private var burst = false
+
+    var body: some View {
+        ZStack {
+            ForEach(0..<7, id: \.self) { index in
+                let angle = Double(index) / 7 * .pi * 2 - .pi / 2
+                Image(systemName: "heart.fill")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(Theme.accent)
+                    .offset(x: burst ? cos(angle) * 58 : 0,
+                            y: burst ? sin(angle) * 58 - 22 : 0)
+                    .opacity(burst ? 0 : 1)
+            }
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 1.15)) { burst = true }
+        }
     }
 }

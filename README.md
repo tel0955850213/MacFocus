@@ -1,11 +1,11 @@
-# MacFocus — Focus Quest
+# MacFocus — Focus Arcana
 
 A gamified Pomodoro timer for macOS, built natively in SwiftUI. Turn focus
 time into a collection game: complete focus sessions to earn XP, keep daily
 streaks, draw new characters from a gacha, and summon an animated **desktop
 companion** that cheers you on while you work.
 
-> Display name: **Focus Quest** · Bundle id: `com.donaldlin.macfocus` · macOS 14+
+> Display name: **Focus Arcana** · Bundle id: `com.donaldlin.macfocus` · macOS 14+
 
 ## Features
 

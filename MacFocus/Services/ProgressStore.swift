@@ -12,10 +12,29 @@ final class ProgressStore: ObservableObject {
     @Published private(set) var bestStreak: Int = 0
     @Published private(set) var sessions: [FocusSession] = []
     @Published private(set) var unlockedIds: Set<String> = []
+    /// Cumulative focus minutes spent with each companion (character id → minutes).
+    @Published private(set) var bondXP: [String: Int] = [:]
+    @Published private(set) var alternatePoseIDs: Set<String> = []
     @Published var partnerId: String? = nil
 
     /// A character just unlocked from a draw — observed by the UI to play the reveal.
     @Published var pendingReveal: GameCharacter? = nil
+
+    /// The most recent completed focus segment — observed by TimerScreen to play
+    /// confetti/celebration. Rewards themselves are recorded at the App level so
+    /// they land even when the main window was never opened.
+    struct FocusCompletion: Equatable {
+        let id: UUID
+        let minutes: Int
+    }
+    @Published var lastCompletion: FocusCompletion? = nil
+
+    struct BondLevelUp: Equatable, Identifiable {
+        let id = UUID()
+        let characterID: String
+        let level: Int
+    }
+    @Published var lastBondLevelUp: BondLevelUp? = nil
 
     private var lastFocusDay: Date? = nil
     private let defaultsKey = "macfocus.progress.v1"
@@ -37,9 +56,58 @@ final class ProgressStore: ObservableObject {
     /// Minutes focused today — used for the daily-goal ring.
     var todayFocusMinutes: Int { sessions.minutes(on: Date()) }
 
+    /// Cumulative focus minutes with a specific companion.
+    func bondMinutes(for character: GameCharacter) -> Int { bondXP[character.id, default: 0] }
+
+    /// Bond level 1...10. Level 10 is reached at 1,800 minutes (~30 hours).
+    func bondLevel(for character: GameCharacter) -> Int {
+        let minutes = bondMinutes(for: character)
+        var level = 1
+        while level < Self.bondThresholds.count,
+              minutes >= Self.bondThresholds[level] {
+            level += 1
+        }
+        return level
+    }
+
+    /// Progress through the current level, normalized to 0...1.
+    func bondProgress(for character: GameCharacter) -> Double {
+        let level = bondLevel(for: character)
+        guard level < Self.bondThresholds.count else { return 1 }
+        let lower = Self.bondThresholds[level - 1]
+        let upper = Self.bondThresholds[level]
+        return Double(bondMinutes(for: character) - lower) / Double(upper - lower)
+    }
+
+    func bondMinutesToNextLevel(for character: GameCharacter) -> Int? {
+        let level = bondLevel(for: character)
+        guard level < Self.bondThresholds.count else { return nil }
+        return max(0, Self.bondThresholds[level] - bondMinutes(for: character))
+    }
+
+    func usesAlternatePose(for character: GameCharacter) -> Bool {
+        alternatePoseIDs.contains(character.id)
+    }
+
+    func setUsesAlternatePose(_ enabled: Bool, for character: GameCharacter) {
+        guard bondLevel(for: character) >= 7 else { return }
+        if enabled {
+            alternatePoseIDs.insert(character.id)
+        } else {
+            alternatePoseIDs.remove(character.id)
+        }
+        save()
+    }
+
+    func displayAssetName(for character: GameCharacter) -> String? {
+        guard usesAlternatePose(for: character), let base = character.assetName else {
+            return character.assetName
+        }
+        return "\(base)_alt"
+    }
+
     func isUnlocked(_ c: GameCharacter) -> Bool {
-        // Pro members get the time-gated legendary characters instantly.
-        unlockedIds.contains(c.id) || (PurchaseStore.shared.isPro && c.unlockHours > 0)
+        unlockedIds.contains(c.id)
     }
     var partner: GameCharacter? { partnerId.flatMap { CharacterCatalog.character(id: $0) } }
 
@@ -48,13 +116,22 @@ final class ProgressStore: ObservableObject {
     /// Call after a focus session ends. Returns characters newly unlocked by the
     /// focus-hours threshold, for the celebration screen.
     @discardableResult
-    func recordCompletedFocus(minutes: Int) -> [GameCharacter] {
-        sessions.append(FocusSession(date: Date(), minutes: minutes))
+    func recordCompletedFocus(minutes: Int, tag: String? = nil) -> [GameCharacter] {
+        sessions.append(FocusSession(date: Date(), minutes: minutes, tag: tag))
         xp += minutes * 2
-        coins += minutes * (PurchaseStore.shared.isPro ? 2 : 1)   // Pro: 2× coins
+        coins += minutes
+        if let partner {
+            let previousLevel = bondLevel(for: partner)
+            bondXP[partner.id, default: 0] += minutes
+            let newLevel = bondLevel(for: partner)
+            if newLevel > previousLevel {
+                lastBondLevelUp = BondLevelUp(characterID: partner.id, level: newLevel)
+            }
+        }
         updateStreak()
         let newlyUnlocked = checkTimeGatedUnlocks()
         if partnerId == nil { partnerId = CharacterCatalog.gachaPool.first?.id }
+        lastCompletion = FocusCompletion(id: UUID(), minutes: minutes)
         save()
         return newlyUnlocked
     }
@@ -124,19 +201,28 @@ final class ProgressStore: ObservableObject {
         return lvl
     }
 
+    /// Cumulative minutes needed to reach each bond level. Index 0 = Level 1.
+    static let bondThresholds = [0, 30, 90, 180, 300, 480, 720, 1_020, 1_380, 1_800]
+
     // MARK: - Persistence
 
     private struct Snapshot: Codable {
         var xp: Int; var coins: Int; var currentStreak: Int; var bestStreak: Int
         var sessions: [FocusSession]; var unlockedIds: [String]
         var partnerId: String?; var lastFocusDay: Date?
+        // Keep every newly added persisted field optional. Older JSON blobs do
+        // not contain it; a non-optional field would make decoding fail and
+        // silently reset an existing user's progress.
+        var bondXP: [String: Int]?
+        var alternatePoseIDs: [String]?
     }
 
     private func save() {
         let snap = Snapshot(xp: xp, coins: coins, currentStreak: currentStreak,
                             bestStreak: bestStreak, sessions: sessions,
                             unlockedIds: Array(unlockedIds), partnerId: partnerId,
-                            lastFocusDay: lastFocusDay)
+                            lastFocusDay: lastFocusDay, bondXP: bondXP,
+                            alternatePoseIDs: Array(alternatePoseIDs))
         if let data = try? JSONEncoder().encode(snap) {
             UserDefaults.standard.set(data, forKey: defaultsKey)
         }
@@ -154,6 +240,8 @@ final class ProgressStore: ObservableObject {
         currentStreak = snap.currentStreak; bestStreak = snap.bestStreak
         sessions = snap.sessions; unlockedIds = Set(snap.unlockedIds)
         partnerId = snap.partnerId; lastFocusDay = snap.lastFocusDay
+        bondXP = snap.bondXP ?? [:]
+        alternatePoseIDs = Set(snap.alternatePoseIDs ?? [])
     }
 
     /// Erase all progress and re-seed the two starter characters.
@@ -163,6 +251,9 @@ final class ProgressStore: ObservableObject {
         unlockedIds = Set(CharacterCatalog.gachaPool.prefix(2).map { $0.id })
         partnerId = unlockedIds.first
         pendingReveal = nil
+        bondXP = [:]
+        lastBondLevelUp = nil
+        alternatePoseIDs = []
         save()
     }
 

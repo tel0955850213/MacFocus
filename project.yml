@@ -33,10 +33,11 @@ targets:
     info:
       path: MacFocus/Info.plist
       properties:
-        CFBundleName: MacFocus
-        CFBundleDisplayName: Focus Quest
+        CFBundleName: Focus Arcana
+        CFBundleDisplayName: Focus Arcana
         CFBundleIdentifier: com.donaldlin.macfocus
-        CFBundleVersion: "1"
+        CFBundleVersion: "3"
+        ITSAppUsesNonExemptEncryption: false
         CFBundleShortVersionString: "1.0"
         LSMinimumSystemVersion: "14.0"
         NSHumanReadableCopyright: ""
@@ -50,7 +51,6 @@ schemes:
         MacFocus: all
     run:
       config: Debug
-      storeKitConfiguration: Products.storekit
     test:
       config: Debug
     profile:

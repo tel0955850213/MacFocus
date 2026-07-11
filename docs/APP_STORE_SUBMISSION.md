@@ -1,20 +1,20 @@
-# MacFocus App Store Submission Notes
+# Focus Arcana App Store Submission Notes
 
 ## App Name
 
-Focus Quest - Pomodoro Timer
+Focus Arcana: Pomodoro RPG
 
 ## Subtitle
 
-Gamified focus timer with companions
+Focus Timer & Hero Collection
 
 ## Short Description
 
-Focus Quest turns Pomodoro sessions into a character-collection game. Complete focus sessions, earn XP and coins, keep your streak alive, unlock heroes, and summon a cute desktop companion while you work.
+Focus Arcana turns Pomodoro sessions into a hero-collection ritual. Complete focus sessions, earn XP and coins, keep your streak alive, unlock heroes, and summon a desktop companion while you work.
 
 ## Keywords
 
-pomodoro,focus,timer,productivity,study,streak,habit,mac,todo,companion,gamified
+study,productivity,habit,desktop companion,hero collection,anime,card game,work timer,gamified
 
 ## Category
 
@@ -26,34 +26,19 @@ The app includes stylized fantasy/anime character artwork. It does not include n
 
 ## Privacy Summary
 
-Current version stores progress locally on the Mac. StoreKit handles subscription purchases. No server-side personal data collection is currently implemented.
+Current version stores progress locally on the Mac. No server-side personal data collection is implemented, and all current features are free.
 
 ## Required URLs
 
 - Support URL: https://github.com/tel0955850213/MacFocus/issues
-- Privacy Policy URL: publish `docs/PRIVACY.md` as a web page before App Store submission
-- Terms URL: publish `docs/TERMS.md` as a web page before App Store submission
-
-## StoreKit Products To Create
-
-Use these identifiers in App Store Connect:
-
-- `com.donaldlin.macfocus.pro.monthly`
-- `com.donaldlin.macfocus.pro.yearly`
-
-Both should unlock Focus Quest Pro:
-
-- 2x focus coins
-- Instant legendary character unlocks
-- Supporter badge / indie development support
+- Privacy Policy URL: https://github.com/tel0955850213/MacFocus/blob/main/docs/PRIVACY.md
+- Terms URL: https://github.com/tel0955850213/MacFocus/blob/main/docs/TERMS.md
 
 ## Release Checklist
 
-- [ ] Create StoreKit products in App Store Connect with the identifiers above
 - [ ] Add Privacy Policy and Terms URLs
-- [ ] Create macOS screenshots in English
+- [x] Create macOS screenshots in English
 - [ ] Confirm app icon renders correctly in Archive
 - [ ] Archive with real signing enabled
 - [ ] Submit for TestFlight first
-- [ ] Verify purchase/restore in sandbox
 - [ ] Submit for App Review

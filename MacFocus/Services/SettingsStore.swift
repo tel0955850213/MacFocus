@@ -15,6 +15,14 @@ final class SettingsStore: ObservableObject {
     @Published var systemNotifications: Bool  { didSet { save("systemNotifications", systemNotifications) } }
     @Published var soundEffects: Bool         { didSet { save("soundEffects", soundEffects) } }
 
+    @Published var showMenuBarTimer: Bool     { didSet { save("showMenuBarTimer", showMenuBarTimer) } }
+    @Published var hideDockIcon: Bool         { didSet { save("hideDockIcon", hideDockIcon) } }
+    @Published var launchAtLogin: Bool        { didSet { save("launchAtLogin", launchAtLogin) } }
+    @Published var lastFocusTag: String?      { didSet { saveOptionalString("lastFocusTag", lastFocusTag) } }
+    @Published var customTags: [String]       { didSet { save("customTags", customTags) } }
+    @Published var ambientSound: String       { didSet { save("ambientSound", ambientSound) } }
+    @Published var ambientVolume: Double      { didSet { save("ambientVolume", ambientVolume) } }
+
     private let d = UserDefaults.standard
     private static let prefix = "macfocus.settings."
 
@@ -34,9 +42,38 @@ final class SettingsStore: ObservableObject {
         completionSound       = boolOr("completionSound", true)
         systemNotifications   = boolOr("systemNotifications", false)
         soundEffects          = boolOr("soundEffects", true)
+        showMenuBarTimer      = boolOr("showMenuBarTimer", true)
+        hideDockIcon          = boolOr("hideDockIcon", false)
+        launchAtLogin         = boolOr("launchAtLogin", false)
+        lastFocusTag          = UserDefaults.standard.string(forKey: Self.prefix + "lastFocusTag")
+        customTags            = UserDefaults.standard.stringArray(forKey: Self.prefix + "customTags") ?? []
+        ambientSound          = UserDefaults.standard.string(forKey: Self.prefix + "ambientSound") ?? AmbientSound.none.rawValue
+        ambientVolume         = UserDefaults.standard.object(forKey: Self.prefix + "ambientVolume") as? Double ?? 0.6
     }
 
     private func save(_ key: String, _ value: Any) {
         d.set(value, forKey: Self.prefix + key)
+    }
+
+    private func saveOptionalString(_ key: String, _ value: String?) {
+        guard let value else {
+            d.removeObject(forKey: Self.prefix + key)
+            return
+        }
+        d.set(value, forKey: Self.prefix + key)
+    }
+
+    func addCustomTag(_ name: String) {
+        let cleaned = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleaned.isEmpty,
+              !FocusTag.allCases.map(\.rawValue).contains(cleaned.lowercased()),
+              !customTags.contains(where: { $0.localizedCaseInsensitiveCompare(cleaned) == .orderedSame })
+        else { return }
+        customTags.append(cleaned)
+    }
+
+    func removeCustomTag(_ name: String) {
+        customTags.removeAll { $0 == name }
+        if lastFocusTag == name { lastFocusTag = nil }
     }
 }

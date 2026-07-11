@@ -1,5 +1,42 @@
 import SwiftUI
 
+/// The three approved original realms in the Focus Arcana world bible.
+enum Realm: String, Codable, CaseIterable, Hashable, Identifiable {
+    case asterra
+    case elyrion
+    case kharvane
+
+    var id: String { rawValue }
+    var nameKey: String { "realm.\(rawValue).name" }
+    var loreKey: String { "realm.\(rawValue).lore" }
+
+    var icon: String {
+        switch self {
+        case .asterra: return "sun.max.fill"
+        case .elyrion: return "moon.stars.fill"
+        case .kharvane: return "flame.fill"
+        }
+    }
+
+    var accentHex: UInt {
+        switch self {
+        case .asterra: return 0xF4C95D
+        case .elyrion: return 0x8EA7FF
+        case .kharvane: return 0xFF6B5E
+        }
+    }
+}
+
+/// Character silhouettes supported by the original roster.
+enum CharacterKind: String, Codable, CaseIterable, Hashable, Identifiable {
+    case heroine
+    case hero
+    case smallfolk
+
+    var id: String { rawValue }
+    var labelKey: String { "character.kind.\(rawValue)" }
+}
+
 enum Rarity: Int, Codable, CaseIterable, Comparable {
     case normal = 0      // N
     case rare = 1        // R
@@ -34,6 +71,8 @@ struct GameCharacter: Identifiable, Codable, Hashable {
     /// Localization key for the character's title (e.g. "char.ember.title").
     let title: String
     let rarity: Rarity
+    let realm: Realm
+    let kind: CharacterKind
     /// Asset image name in Assets.xcassets/characters; nil ⇒ render placeholder.
     let assetName: String?
     /// Extra unlock condition: cumulative focus-hours threshold. 0 ⇒ gacha-only.

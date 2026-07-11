@@ -15,13 +15,13 @@ if command -v timeout >/dev/null; then TIMEOUT=(timeout 300)
 elif command -v gtimeout >/dev/null; then TIMEOUT=(gtimeout 300)
 else TIMEOUT=(); fi
 
-CHAR_DESC="a cute round red tomato-spirit mascot for a focus app, glossy red tomato body, a small green leaf sprout on top, big friendly sparkling eyes, rosy cheeks, tiny stubby arms and legs, kawaii chibi flat vector mascot, bold clean outlines, simple modern style, purple-and-pink magical sparkle accents"
+CHAR_DESC="a cute round red tomato-spirit mascot for a focus app, glossy red tomato body, a small green leaf sprout on top, big friendly gleaming eyes, rosy cheeks, tiny stubby arms and legs, kawaii chibi flat vector mascot, bold clean outlines, simple modern style, purple-and-pink magical glow accents"
 STYLE="single centered character, full body, facing viewer, flat solid pure chroma-key green background, no text, no shadow on background, cute, friendly, SFW"
 
 POSES=(
   "idle|standing happily, gentle closed smile, arms relaxed at sides, eyes open"
   "wave|smiling and waving one little arm up in greeting, eyes open"
-  "celebrate|cheering with both little arms raised up high, big happy open smile, sparkles around"
+  "celebrate|cheering with both little arms raised up high, big happy open smile, soft glow around"
 )
 
 mkdir -p "$ASSETS"

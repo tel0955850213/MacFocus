@@ -19,7 +19,7 @@ enum AppTab: String, CaseIterable, Identifiable {
         switch self {
         case .timer: return "timer"
         case .collection: return "square.grid.2x2.fill"
-        case .gacha: return "sparkles"
+        case .gacha: return "bolt.fill"
         case .stats: return "chart.bar.fill"
         case .profile: return "person.crop.circle.fill"
         case .settings: return "gearshape.fill"
@@ -41,7 +41,7 @@ struct ContentView: View {
                 .navigationSplitViewColumnWidth(min: 180, ideal: 200, max: 220)
         } detail: {
             ZStack {
-                Theme.bg.ignoresSafeArea()
+                Theme.backgroundGradient.ignoresSafeArea()
                 Group {
                     switch tab {
                     case .timer: TimerScreen()
@@ -72,9 +72,9 @@ struct ContentView: View {
 
     private var sidebar: some View {
         ZStack {
-            Theme.surface.ignoresSafeArea()
+            Theme.sidebarGradient.ignoresSafeArea()
             VStack(alignment: .leading, spacing: 4) {
-                Text("Focus Quest")
+                Text("Focus Arcana")
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
                     .foregroundStyle(Theme.primaryHi)
                     .padding(.horizontal, 14).padding(.top, 18).padding(.bottom, 12)

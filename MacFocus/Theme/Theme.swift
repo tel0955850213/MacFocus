@@ -1,24 +1,32 @@
 import SwiftUI
 
 enum Theme {
-    // Brand palette — vivid, Duolingo-energy
-    static let bg = Color(hex: 0x0E0B1A)
-    static let surface = Color(hex: 0x1B1530)
-    static let surfaceHi = Color(hex: 0x2A2147)
-    static let primary = Color(hex: 0x7C4DFF)
-    static let primaryHi = Color(hex: 0xB388FF)
-    static let accent = Color(hex: 0xFF4D8D)
-    static let gold = Color(hex: 0xFFC94D)
-    static let mint = Color(hex: 0x4DE3B0)
+    // Brand palette — saturated game-card colors grounded by a cool slate UI.
+    static let bg = Color(hex: 0x101A26)
+    static let surface = Color(hex: 0x1B2A3A)
+    static let surfaceHi = Color(hex: 0x2B4053)
+    static let primary = Color(hex: 0x4E7BFF)
+    static let primaryHi = Color(hex: 0x88C8FF)
+    static let accent = Color(hex: 0xFF5F8F)
+    static let gold = Color(hex: 0xFFD15C)
+    static let mint = Color(hex: 0xC6F36D)
     static let textPrimary = Color.white
     static let textSecondary = Color.white.opacity(0.62)
 
+    static let backgroundGradient = LinearGradient(
+        colors: [Color(hex: 0x17283B), Color(hex: 0x0D151F)],
+        startPoint: .topLeading, endPoint: .bottomTrailing)
+
+    static let sidebarGradient = LinearGradient(
+        colors: [Color(hex: 0x1C3045), Color(hex: 0x142231)],
+        startPoint: .top, endPoint: .bottom)
+
     static let heroGradient = LinearGradient(
-        colors: [Color(hex: 0x7C4DFF), Color(hex: 0xFF4D8D)],
+        colors: [Color(hex: 0x4E7BFF), Color(hex: 0xFF5F8F)],
         startPoint: .topLeading, endPoint: .bottomTrailing)
 
     static let goldGradient = LinearGradient(
-        colors: [Color(hex: 0xFFE08A), Color(hex: 0xFFB44D)],
+        colors: [Color(hex: 0xFFF19A), Color(hex: 0xFFB64D)],
         startPoint: .top, endPoint: .bottom)
 
     static func rarityGradient(_ r: Rarity) -> LinearGradient {

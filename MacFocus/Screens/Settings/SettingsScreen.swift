@@ -4,6 +4,7 @@ struct SettingsScreen: View {
     @EnvironmentObject var settings: SettingsStore
     @EnvironmentObject var progress: ProgressStore
     @EnvironmentObject var loc: LocalizationManager
+    @EnvironmentObject var ambient: AmbientSoundPlayer
     @State private var showResetConfirm = false
 
     var body: some View {
@@ -16,6 +17,8 @@ struct SettingsScreen: View {
                 languageSection
                 timerSection
                 notifSection
+                ambientSection
+                appPresenceSection
                 dataSection
             }
             .padding(32)
@@ -28,13 +31,34 @@ struct SettingsScreen: View {
 
     private var languageSection: some View {
         SettingsCard(title: loc("settings.language")) {
-            Picker("", selection: $loc.language) {
+            VStack(spacing: 0) {
                 ForEach(AppLanguage.allCases) { lang in
-                    Text(loc(lang.displayKey)).tag(lang)
+                    Button {
+                        loc.language = lang
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: loc.language == lang
+                                  ? "checkmark.circle.fill"
+                                  : "circle")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundStyle(loc.language == lang
+                                                 ? Theme.primaryHi
+                                                 : Theme.textSecondary)
+                            Text(loc(lang.displayKey))
+                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.white)
+                            Spacer()
+                        }
+                        .contentShape(Rectangle())
+                        .padding(.vertical, 7)
+                    }
+                    .buttonStyle(.plain)
+
+                    if lang != AppLanguage.allCases.last {
+                        Divider().overlay(Theme.surfaceHi)
+                    }
                 }
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
         }
     }
 
@@ -76,6 +100,66 @@ struct SettingsScreen: View {
 
     // MARK: - Data & about
 
+    private var appPresenceSection: some View {
+        SettingsCard(title: loc("settings.appPresence")) {
+            toggleRow(loc("settings.menuBarTimer"), isOn: $settings.showMenuBarTimer)
+            Divider().overlay(Theme.surfaceHi)
+            toggleRow(loc("settings.hideDock"), isOn: $settings.hideDockIcon)
+            Divider().overlay(Theme.surfaceHi)
+            toggleRow(loc("settings.launchAtLogin"), isOn: $settings.launchAtLogin)
+            if settings.launchAtLogin && AppLifecycle.launchAtLoginNeedsApproval {
+                Text(loc("settings.launchApproval"))
+                    .font(.system(size: 12, design: .rounded))
+                    .foregroundStyle(Theme.gold)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+
+    private var ambientSection: some View {
+        SettingsCard(title: loc("settings.ambient")) {
+            ForEach(AmbientSound.allCases) { sound in
+                Button {
+                    select(sound)
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: icon(for: sound))
+                            .frame(width: 18)
+                            .foregroundStyle(selectedSound == sound ? Theme.primaryHi : Theme.textSecondary)
+                        Text(loc(sound.labelKey))
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white)
+                        Spacer()
+                        if selectedSound == sound {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(Theme.primaryHi)
+                        }
+                    }
+                    .padding(.vertical, 3)
+                }
+                .buttonStyle(.plain)
+                if sound != AmbientSound.allCases.last {
+                    Divider().overlay(Theme.surfaceHi)
+                }
+            }
+
+            Divider().overlay(Theme.surfaceHi)
+            HStack(spacing: 12) {
+                Image(systemName: "speaker.wave.2.fill")
+                    .foregroundStyle(Theme.textSecondary)
+                Slider(value: $settings.ambientVolume, in: 0...1)
+                    .tint(Theme.primaryHi)
+                    .disabled(selectedSound == .none)
+                Text("\(Int(settings.ambientVolume * 100))%")
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Theme.textSecondary)
+                    .frame(width: 34, alignment: .trailing)
+            }
+        }
+    }
+
+    // MARK: - Data & about
+
     private var dataSection: some View {
         SettingsCard(title: loc("settings.data")) {
             HStack {
@@ -94,7 +178,7 @@ struct SettingsScreen: View {
                 Button(loc("common.cancel"), role: .cancel) {}
             }
             Divider().overlay(Theme.surfaceHi)
-            infoRow(loc("settings.version"), trailing: "1.0 (1)")
+            infoRow(loc("settings.version"), trailing: "1.0 (3)")
             Divider().overlay(Theme.surfaceHi)
             HStack {
                 Text(loc("settings.github")).font(.system(size: 14, design: .rounded)).foregroundStyle(.white)
@@ -142,6 +226,25 @@ struct SettingsScreen: View {
             Text(title).font(.system(size: 14, design: .rounded)).foregroundStyle(.white)
             Spacer()
             Text(trailing).font(.system(size: 13, design: .rounded)).foregroundStyle(Theme.textSecondary)
+        }
+    }
+
+    private var selectedSound: AmbientSound {
+        AmbientSound(rawValue: settings.ambientSound) ?? .none
+    }
+
+    private func select(_ sound: AmbientSound) {
+        settings.ambientSound = sound.rawValue
+        ambient.preview(sound)
+    }
+
+    private func icon(for sound: AmbientSound) -> String {
+        switch sound {
+        case .none: return "speaker.slash.fill"
+        case .rain: return "cloud.rain.fill"
+        case .whitenoise: return "waveform"
+        case .cafe: return "cup.and.saucer.fill"
+        case .lofiPad: return "music.note"
         }
     }
 }
