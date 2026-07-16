@@ -40,7 +40,13 @@ struct OnboardingView: View {
                 ZStack {
                     Circle().fill(p.tint.opacity(0.18)).frame(width: 150, height: 150)
                     if page == 0 {
-                        MascotView(state: .wave, size: 140)
+                        Image("char_celestia")
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 140, height: 140, alignment: .top)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Theme.goldGradient, lineWidth: 3))
+                            .shadow(color: Theme.gold.opacity(0.45), radius: 18, y: 6)
                     } else {
                         Image(systemName: p.icon)
                             .font(.system(size: 64, weight: .bold))

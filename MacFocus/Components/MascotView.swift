@@ -41,9 +41,9 @@ struct MascotView: View {
 
     private func frameImage(_ name: String) -> some View {
         Group {
-            if NSImage(named: name) != nil {
+            if AssetLookup.exists(name) {
                 Image(name).resizable().interpolation(.high).aspectRatio(contentMode: .fit)
-            } else if NSImage(named: "mascot_idle") != nil {
+            } else if AssetLookup.exists("mascot_idle") {
                 Image("mascot_idle").resizable().interpolation(.high).aspectRatio(contentMode: .fit)
             } else {
                 // Vector fallback if the generated art is missing.

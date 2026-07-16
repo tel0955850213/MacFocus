@@ -23,6 +23,7 @@ Pods/
 
 # Local scratch / intermediate image-generation files
 tmp/
+artifacts/
 .superpowers/
 
 # Local collaboration handoff; never publish.

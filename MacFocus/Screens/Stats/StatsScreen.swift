@@ -23,7 +23,8 @@ struct StatsScreen: View {
                     .font(.system(size: 26, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
 
-                HStack(spacing: 14) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 140, maximum: 190), spacing: 14)],
+                          spacing: 14) {
                     StatTile(value: String(format: "%.1f", progress.totalFocusHours),
                              unit: loc("unit.hours"), label: loc("stats.totalFocus"), color: Theme.primaryHi)
                     StatTile(value: "\(progress.currentStreak)", unit: loc("unit.days"), label: loc("stats.streak"), color: Theme.accent)
@@ -131,12 +132,15 @@ struct StatTile: View {
                 Text(unit)
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(Theme.textSecondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
             }
             Text(label)
                 .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundStyle(color)
         }
         .padding(16)
+        .frame(minHeight: 104)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(color.opacity(0.25), lineWidth: 1))

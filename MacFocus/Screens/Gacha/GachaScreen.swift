@@ -1,4 +1,6 @@
+#if os(macOS)
 import AppKit
+#endif
 import SwiftUI
 
 /// A mouse-driven summoning machine. The player physically pulls the sealed card
@@ -41,15 +43,18 @@ struct GachaScreen: View {
                     .padding(22)
 
 #if DEBUG
-                Button(loc("gacha.debugGrant")) { progress._debugGrant(coins: 500) }
-                    .buttonStyle(.plain)
-                    .font(.system(size: 10, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.55))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(.black.opacity(0.48), in: Capsule())
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                    .padding(22)
+                if !ProcessInfo.processInfo.arguments.contains("--screenshot-mode") {
+                    Button(loc("gacha.debugGrant")) { progress._debugGrant(coins: 500) }
+                        .accessibilityIdentifier("debug-grant-coins")
+                        .buttonStyle(.plain)
+                        .font(.system(size: 10, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.55))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(.black.opacity(0.48), in: Capsule())
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                        .padding(22)
+                }
 #endif
 
                 Color.white
@@ -92,6 +97,7 @@ struct GachaScreen: View {
                 Text(String(format: loc("gacha.coins"), progress.coins))
                     .font(.system(size: 12, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
+                    .accessibilityIdentifier("coin-balance")
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
@@ -151,11 +157,14 @@ struct GachaScreen: View {
             .gesture(pullGesture)
             .onHover { hovering in
                 hoveringCard = hovering
+                #if os(macOS)
                 if canDraw && !isSummoning {
                     hovering ? NSCursor.openHand.set() : NSCursor.arrow.set()
                 }
+                #endif
             }
             .accessibilityAddTraits(.isButton)
+            .accessibilityIdentifier("summon-card")
             .accessibilityLabel(Text(loc("gacha.hint")))
             .accessibilityAction {
                 if canDraw { finishSummon() }
@@ -169,7 +178,9 @@ struct GachaScreen: View {
             .onChanged { value in
                 guard canDraw, !isSummoning else { return }
                 isDragging = true
+                #if os(macOS)
                 NSCursor.closedHand.set()
+                #endif
                 cardOffset = CGSize(
                     width: value.translation.width,
                     height: max(-14, value.translation.height))
@@ -177,7 +188,9 @@ struct GachaScreen: View {
             .onEnded { value in
                 guard canDraw, !isSummoning else { return }
                 isDragging = false
+                #if os(macOS)
                 hoveringCard ? NSCursor.openHand.set() : NSCursor.arrow.set()
+                #endif
 
                 if value.translation.height >= pullThreshold {
                     finishSummon()

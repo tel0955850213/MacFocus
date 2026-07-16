@@ -1,4 +1,3 @@
-import AppKit
 import Foundation
 
 /// Character catalog. Splash art is produced by scripts/gen_characters.sh via the
@@ -94,7 +93,7 @@ enum CharacterCatalog {
         // joins the pool automatically when its image set is bundled.
         all.filter { character in
             character.unlockHours == 0 &&
-            (character.assetName.flatMap { NSImage(named: $0) } != nil)
+            (character.assetName.map(AssetLookup.exists) ?? false)
         }
     }
 

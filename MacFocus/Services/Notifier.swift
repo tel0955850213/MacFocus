@@ -1,5 +1,9 @@
 import Foundation
+#if os(macOS)
 import AppKit
+#else
+import AudioToolbox
+#endif
 import UserNotifications
 
 /// Plays the completion sound and (optionally) posts a system notification when a
@@ -9,7 +13,11 @@ enum Notifier {
     @MainActor
     static func focusFinished(settings: SettingsStore, loc: LocalizationManager, minutes: Int) {
         if settings.completionSound || settings.soundEffects {
+            #if os(macOS)
             NSSound(named: "Glass")?.play()
+            #else
+            AudioServicesPlaySystemSound(1007)
+            #endif
         }
         if settings.systemNotifications {
             postBanner(title: loc("notify.focusComplete"),
@@ -27,7 +35,11 @@ enum Notifier {
     @MainActor
     static func effect(settings: SettingsStore, named: String = "Pop") {
         guard settings.soundEffects else { return }
+        #if os(macOS)
         NSSound(named: named)?.play()
+        #else
+        AudioServicesPlaySystemSound(1104)
+        #endif
     }
 
     private static func postBanner(title: String, body: String) {

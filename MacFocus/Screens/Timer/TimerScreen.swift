@@ -34,6 +34,9 @@ struct TimerScreen: View {
                 .padding(32)
                 .frame(maxWidth: 640)
                 .frame(maxWidth: .infinity)
+                #if os(iOS)
+                .safeAreaPadding(.bottom, 82)
+                #endif
             }
             ConfettiView(burst: confetti)
         }

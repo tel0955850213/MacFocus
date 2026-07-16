@@ -13,7 +13,7 @@ struct CharacterPortrait: View {
     var body: some View {
         Color.clear
             .overlay(alignment: fillAlignment) {
-                if let name = assetNameOverride ?? character.assetName, NSImage(named: name) != nil {
+                if let name = assetNameOverride ?? character.assetName, AssetLookup.exists(name) {
                     Image(name)
                         .resizable()
                         .aspectRatio(contentMode: .fill)

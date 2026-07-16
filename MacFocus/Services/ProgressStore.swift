@@ -259,5 +259,33 @@ final class ProgressStore: ObservableObject {
 
 #if DEBUG
     func _debugGrant(coins: Int) { self.coins += coins; save() }
+
+    func _debugSeedShowcase() {
+        let calendar = Calendar.current
+        xp = 860
+        coins = 3_250
+        currentStreak = 12
+        bestStreak = 18
+        sessions = (0..<84).compactMap { offset in
+            let age = 83 - offset
+            guard age % 3 != 0 || age < 14,
+                  let date = calendar.date(byAdding: .day, value: -age, to: Date())
+            else { return nil }
+            let minutes = [25, 50, 75, 100][offset % 4]
+            let tag = [FocusTag.work.rawValue, FocusTag.study.rawValue,
+                       FocusTag.create.rawValue][offset % 3]
+            return FocusSession(date: date, minutes: minutes, tag: tag)
+        }
+        unlockedIds = Set(CharacterCatalog.gachaPool.prefix(9).map(\.id))
+        if let celestia = CharacterCatalog.character(id: "char_celestia") {
+            unlockedIds.insert(celestia.id)
+            partnerId = celestia.id
+            bondXP[celestia.id] = 480
+        } else {
+            partnerId = unlockedIds.first
+        }
+        lastFocusDay = Date()
+        save()
+    }
 #endif
 }

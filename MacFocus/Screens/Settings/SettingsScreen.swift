@@ -18,7 +18,9 @@ struct SettingsScreen: View {
                 timerSection
                 notifSection
                 ambientSection
+                #if os(macOS)
                 appPresenceSection
+                #endif
                 dataSection
             }
             .padding(32)
@@ -100,6 +102,7 @@ struct SettingsScreen: View {
 
     // MARK: - Data & about
 
+    #if os(macOS)
     private var appPresenceSection: some View {
         SettingsCard(title: loc("settings.appPresence")) {
             toggleRow(loc("settings.menuBarTimer"), isOn: $settings.showMenuBarTimer)
@@ -115,6 +118,7 @@ struct SettingsScreen: View {
             }
         }
     }
+    #endif
 
     private var ambientSection: some View {
         SettingsCard(title: loc("settings.ambient")) {
@@ -178,7 +182,7 @@ struct SettingsScreen: View {
                 Button(loc("common.cancel"), role: .cancel) {}
             }
             Divider().overlay(Theme.surfaceHi)
-            infoRow(loc("settings.version"), trailing: "1.0 (3)")
+            infoRow(loc("settings.version"), trailing: appVersion)
             Divider().overlay(Theme.surfaceHi)
             HStack {
                 Text(loc("settings.github")).font(.system(size: 14, design: .rounded)).foregroundStyle(.white)
@@ -196,6 +200,12 @@ struct SettingsScreen: View {
                     .font(.system(size: 12, design: .rounded)).foregroundStyle(Theme.primaryHi)
             }
         }
+    }
+
+    private var appVersion: String {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
+        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
+        return "\(version) (\(build))"
     }
 
     // MARK: - Reusable rows

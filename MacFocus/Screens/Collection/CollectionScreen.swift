@@ -70,7 +70,7 @@ struct CharacterDetailSheet: View {
     private var alternateAssetName: String? {
         guard let base = character.assetName else { return nil }
         let name = "\(base)_alt"
-        return NSImage(named: name) == nil ? nil : name
+        return AssetLookup.exists(name) ? name : nil
     }
 
     var body: some View {
